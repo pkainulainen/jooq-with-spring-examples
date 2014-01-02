@@ -1,6 +1,7 @@
 package net.petrikainulainen.spring.jooq.todo.repository;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import net.petrikainulainen.spring.jooq.config.PersistenceContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,8 @@ import static junit.framework.Assert.assertEquals;
  * @author Petri Kainulainen
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes = {PersistenceContext.class})
-@ContextConfiguration(locations = {"classpath:exampleApplicationContext-persistence.xml"})
+@ContextConfiguration(classes = {PersistenceContext.class})
+//@ContextConfiguration(locations = {"classpath:exampleApplicationContext-persistence.xml"})
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
         DirtiesContextTestExecutionListener.class,
         TransactionalTestExecutionListener.class,

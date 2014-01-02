@@ -13,8 +13,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
@@ -30,6 +33,7 @@ public class PersistenceContext {
 
     private static final String PROPERTY_NAME_DB_DRIVER = "db.driver";
     private static final String PROPERTY_NAME_DB_PASSWORD = "db.password";
+    private static final String PROPERTY_NAME_DB_SCHEMA_SCRIPT = "db.schema.script";
     private static final String PROPERTY_NAME_DB_URL = "db.url";
     private static final String PROPERTY_NAME_DB_USERNAME = "db.username";
 
@@ -84,5 +88,17 @@ public class PersistenceContext {
     @Bean
     public DefaultDSLContext dsl() {
         return new DefaultDSLContext(configuration());
+    }
+
+    @Bean
+    public DataSourceInitializer dataSourceInitializer() {
+        DataSourceInitializer initializer = new DataSourceInitializer();
+        initializer.setDataSource(dataSource());
+
+        ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+        populator.addScript(new ClassPathResource(env.getRequiredProperty(PROPERTY_NAME_DB_SCHEMA_SCRIPT)));
+
+        initializer.setDatabasePopulator(populator);
+        return initializer;
     }
 }

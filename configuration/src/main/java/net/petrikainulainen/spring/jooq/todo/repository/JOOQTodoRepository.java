@@ -26,7 +26,7 @@ public class JOOQTodoRepository implements TodoRepository {
     public Integer findOne() {
         LOGGER.info("findOne() method was invoked");
 
-        Result<Record1<Integer>> result = jooq.selectOne ().fetch();
+        Result<Record1<Integer>> result = jooq.selectOne().fetch();
         LOGGER.debug("Received result: {}", result);
 
         return (Integer) result.getValue(0, "1");
