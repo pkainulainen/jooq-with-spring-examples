@@ -40,7 +40,7 @@
         <constructor-arg ref="config" />
     </bean>
 
-    <bean id="jooqToSpringExceptionTransformer" class="net.petrikainulainen.spring.jooq.exception.JOOQToSpringExceptionTransformer"/>
+    <bean id="jooqToSpringExceptionTransformer" class="net.petrikainulainen.spring.jooq.config.exception.JOOQToSpringExceptionTransformer"/>
 
     <bean class="org.jooq.impl.DefaultConfiguration" name="config">
         <constructor-arg index="0" ref="connectionProvider" />

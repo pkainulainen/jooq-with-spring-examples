@@ -1,4 +1,4 @@
-package net.petrikainulainen.spring.jooq.exception;
+package net.petrikainulainen.spring.jooq.config.exception;
 
 import org.jooq.ExecuteContext;
 import org.jooq.SQLDialect;

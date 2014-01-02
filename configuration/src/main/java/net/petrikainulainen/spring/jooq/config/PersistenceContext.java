@@ -1,7 +1,7 @@
 package net.petrikainulainen.spring.jooq.config;
 
 import com.jolbox.bonecp.BoneCPDataSource;
-import net.petrikainulainen.spring.jooq.exception.JOOQToSpringExceptionTransformer;
+import net.petrikainulainen.spring.jooq.config.exception.JOOQToSpringExceptionTransformer;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DataSourceConnectionProvider;
 import org.jooq.impl.DefaultConfiguration;

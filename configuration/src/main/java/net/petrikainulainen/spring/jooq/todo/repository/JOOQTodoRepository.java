@@ -1,14 +1,19 @@
 package net.petrikainulainen.spring.jooq.todo.repository;
 
-import org.jooq.Record1;
-import org.jooq.Result;
+import net.petrikainulainen.spring.jooq.todo.exception.NotFoundException;
+import net.petrikainulainen.spring.jooq.todo.model.Todo;
+import org.jooq.Record;
 import org.jooq.impl.DefaultDSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * This was implemented only to ensure that the transaction configuration is working.
+ * IT DOESN'T FOLLOW THE BEST PRACTICES OF QUERY GENERATION AND YOU SHOULD NOT USE
+ * THIS CODE!!!
  * @author Petri Kainulainen
  */
 @Repository
@@ -23,12 +28,59 @@ public class JOOQTodoRepository implements TodoRepository {
         this.jooq = jooq;
     }
 
-    public Integer findOne() {
-        LOGGER.info("findOne() method was invoked");
+    @Transactional(readOnly = true)
+    @Override
+    public Todo findById(Long id) {
+        LOGGER.info("Finding todo by id: {}", id);
 
-        Result<Record1<Integer>> result = jooq.selectOne().fetch();
-        LOGGER.debug("Received result: {}", result);
+        Record queryResult = jooq.select()
+                .from("todos")
+                .where("id=?", id)
+                .fetchOne();
 
-        return (Integer) result.getValue(0, "1");
+        LOGGER.debug("Got result: {}", queryResult);
+
+        if (queryResult == null) {
+            throw new NotFoundException("No todo found with id: " + id);
+        }
+
+        return Todo.getBuilder(queryResult.getValue("TITLE", String.class))
+                .description(queryResult.getValue("DESCRIPTION", String.class))
+                .id(queryResult.getValue("ID", Long.class))
+                .build();
     }
+
+    @Transactional
+    @Override
+    public void update(Todo updated) {
+        LOGGER.info("Updating todo: {}", updated);
+
+        jooq.execute("update todos set description=?, title=? where id=?",
+                updated.getDescription(),
+                updated.getTitle(),
+                updated.getId()
+        );
+
+        LOGGER.info("Todo: {} was updated", updated);
+    }
+
+    @Transactional
+    @Override
+    public void updateAndThrowException(Todo updated) {
+        LOGGER.info("Updating todo: {}", updated);
+
+        jooq.execute("update todos set description=?, title=? where id=?",
+                updated.getDescription(),
+                updated.getTitle(),
+                updated.getId()
+        );
+
+        LOGGER.info("Todo: {} was updated", updated);
+
+        //This should throw a DataAccessException because the table 'foos' does not exist.
+        jooq.select()
+                .from("foos")
+                .fetch();
+    }
+
 }
