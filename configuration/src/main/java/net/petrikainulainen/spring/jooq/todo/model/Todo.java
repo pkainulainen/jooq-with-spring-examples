@@ -1,5 +1,7 @@
 package net.petrikainulainen.spring.jooq.todo.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * @author Petri Kainulainen
  */
@@ -29,6 +31,15 @@ public class Todo {
 
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", id)
+                .append("description", description)
+                .append("title", title)
+                .build();
     }
 
     public static class Builder {
