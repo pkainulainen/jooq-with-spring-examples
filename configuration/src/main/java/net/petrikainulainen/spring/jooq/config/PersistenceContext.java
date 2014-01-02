@@ -1,10 +1,12 @@
 package net.petrikainulainen.spring.jooq.config;
 
 import com.jolbox.bonecp.BoneCPDataSource;
+import net.petrikainulainen.spring.jooq.exception.JOOQToSpringExceptionTransformer;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DataSourceConnectionProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultDSLContext;
+import org.jooq.impl.DefaultExecuteListenerProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -53,7 +55,7 @@ public class PersistenceContext {
 
     @Bean
     public DataSourceTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(transactionAwareDataSource());
+        return new DataSourceTransactionManager(dataSource());
     }
 
     @Bean
@@ -62,10 +64,18 @@ public class PersistenceContext {
     }
 
     @Bean
+    public JOOQToSpringExceptionTransformer jooqToSpringExceptionTransformer() {
+        return new JOOQToSpringExceptionTransformer();
+    }
+
+    @Bean
     public DefaultConfiguration configuration() {
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
 
         jooqConfiguration.set(connectionProvider());
+        jooqConfiguration.set(new DefaultExecuteListenerProvider(
+            jooqToSpringExceptionTransformer()
+        ));
         jooqConfiguration.set(SQLDialect.H2);
 
         return jooqConfiguration;
