@@ -13,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * This was implemented only to ensure that the transaction configuration is working.
  * IT DOESN'T FOLLOW THE BEST PRACTICES OF QUERY GENERATION AND YOU SHOULD NOT USE
- * THIS CODE!!!
+ * THIS CODE!!! The only reason why I wrote this horrible code was that I didn't want
+ * to talk about code generation in my first blog post of my jooq tutorial.
  * @author Petri Kainulainen
  */
 @Repository
