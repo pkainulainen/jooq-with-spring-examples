@@ -6,10 +6,10 @@ RUNNING THE TESTS:
 
 1.  You can run unit tests by using the following command:
 
-        mvn clean test -P dev
+    mvn clean test -P dev
 
 2.  You can run integration tests by using the following command:
 
-        mvn clean verify -P integration-test
+    mvn clean verify -P integration-test
 
 
