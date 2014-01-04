@@ -15,6 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -36,6 +37,7 @@ public class PersistenceContext {
     private static final String PROPERTY_NAME_DB_SCHEMA_SCRIPT = "db.schema.script";
     private static final String PROPERTY_NAME_DB_URL = "db.url";
     private static final String PROPERTY_NAME_DB_USERNAME = "db.username";
+    private static final String PROPERTY_NAME_JOOQ_SQL_DIALECT = "jooq.sql.dialect";
 
     @Autowired
     private Environment env;
@@ -53,13 +55,18 @@ public class PersistenceContext {
     }
 
     @Bean
+    public LazyConnectionDataSourceProxy lazyConnectionDataSource() {
+        return new LazyConnectionDataSourceProxy(dataSource());
+    }
+
+    @Bean
     public TransactionAwareDataSourceProxy transactionAwareDataSource() {
-        return new TransactionAwareDataSourceProxy(dataSource());
+        return new TransactionAwareDataSourceProxy(lazyConnectionDataSource());
     }
 
     @Bean
     public DataSourceTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource());
+        return new DataSourceTransactionManager(lazyConnectionDataSource());
     }
 
     @Bean
@@ -80,7 +87,10 @@ public class PersistenceContext {
         jooqConfiguration.set(new DefaultExecuteListenerProvider(
             jooqToSpringExceptionTransformer()
         ));
-        jooqConfiguration.set(SQLDialect.H2);
+
+        String sqlDialectName = env.getRequiredProperty(PROPERTY_NAME_JOOQ_SQL_DIALECT);
+        SQLDialect dialect = SQLDialect.valueOf(sqlDialectName);
+        jooqConfiguration.set(dialect);
 
         return jooqConfiguration;
     }
@@ -96,7 +106,9 @@ public class PersistenceContext {
         initializer.setDataSource(dataSource());
 
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        populator.addScript(new ClassPathResource(env.getRequiredProperty(PROPERTY_NAME_DB_SCHEMA_SCRIPT)));
+        populator.addScript(
+                new ClassPathResource(env.getRequiredProperty(PROPERTY_NAME_DB_SCHEMA_SCRIPT))
+        );
 
         initializer.setDatabasePopulator(populator);
         return initializer;

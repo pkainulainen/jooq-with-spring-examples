@@ -12,7 +12,6 @@
     <context:component-scan base-package="net.petrikainulainen.spring.jooq.todo"/>
     <context:property-placeholder location="classpath:application.properties" ignore-resource-not-found="false"/>
 
-    <!-- Configure data source -->
     <bean id="dataSource" class="com.jolbox.bonecp.BoneCPDataSource" destroy-method="close">
         <property name="driverClass" value="${db.driver}"/>
         <property name="jdbcUrl" value="${db.url}"/>
@@ -20,18 +19,20 @@
         <property name="password" value="${db.password}"/>
     </bean>
 
-    <!-- Configure transaction management -->
+    <bean id="lazyConnectionDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
     <bean id="transactionAwareDataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
-        <constructor-arg ref="dataSource" />
+        <constructor-arg ref="lazyConnectionDataSource" />
     </bean>
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
+        <property name="dataSource" ref="lazyConnectionDataSource"/>
     </bean>
 
     <tx:annotation-driven/>
 
-    <!-- Configure the jOOQ connection provider to use the correct data source -->
     <bean class="org.jooq.impl.DataSourceConnectionProvider" name="connectionProvider">
         <constructor-arg ref="transactionAwareDataSource" />
     </bean>
