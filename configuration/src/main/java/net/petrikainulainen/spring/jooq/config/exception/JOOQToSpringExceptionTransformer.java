@@ -9,9 +9,9 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
 /**
  * This class transforms SQLException into a Spring specific DataAccessException.
- * The idea behind this is borrowed from Sergey Epik.
+ * The idea behind this is borrowed from Adam Zell's Gist
  *
- * See this more details: https://groups.google.com/forum/?fromgroups#!topic/jooq-user/XTDG9VVP-3I
+ * See this more details: https://gist.github.com/azell/5655888
  * @author Petri Kainulainen
  */
 public class JOOQToSpringExceptionTransformer extends DefaultExecuteListener {
