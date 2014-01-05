@@ -1,8 +1,8 @@
 package net.petrikainulainen.spring.jooq.todo.repository;
 
+import net.petrikainulainen.spring.jooq.todo.db.tables.records.TodosRecord;
 import net.petrikainulainen.spring.jooq.todo.exception.NotFoundException;
 import net.petrikainulainen.spring.jooq.todo.model.Todo;
-import org.jooq.Record;
 import org.jooq.impl.DefaultDSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import static net.petrikainulainen.spring.jooq.todo.db.tables.Todos.TODOS;
+
 /**
- * This was implemented only to ensure that the transaction configuration is working.
- * IT DOESN'T FOLLOW THE BEST PRACTICES OF QUERY GENERATION AND YOU SHOULD NOT USE
- * THIS CODE!!! The only reason why I wrote this horrible code was that I didn't want
- * to talk about code generation in my first blog post of my jooq tutorial.
+ * This class was implemented only to ensure that the transaction configuration is working.
  * @author Petri Kainulainen
  */
 @Repository
@@ -34,9 +33,8 @@ public class JOOQTodoRepository implements TodoRepository {
     public Todo findById(Long id) {
         LOGGER.info("Finding todo by id: {}", id);
 
-        Record queryResult = jooq.select()
-                .from("todos")
-                .where("id=?", id)
+        TodosRecord queryResult = jooq.selectFrom(TODOS)
+                .where(TODOS.ID.equal(id))
                 .fetchOne();
 
         LOGGER.debug("Got result: {}", queryResult);
@@ -45,9 +43,9 @@ public class JOOQTodoRepository implements TodoRepository {
             throw new NotFoundException("No todo found with id: " + id);
         }
 
-        return Todo.getBuilder(queryResult.getValue("TITLE", String.class))
-                .description(queryResult.getValue("DESCRIPTION", String.class))
-                .id(queryResult.getValue("ID", Long.class))
+        return Todo.getBuilder(queryResult.getTitle())
+                .description(queryResult.getDescription())
+                .id(queryResult.getId())
                 .build();
     }
 
@@ -56,11 +54,11 @@ public class JOOQTodoRepository implements TodoRepository {
     public void update(Todo updated) {
         LOGGER.info("Updating todo: {}", updated);
 
-        jooq.execute("update todos set description=?, title=? where id=?",
-                updated.getDescription(),
-                updated.getTitle(),
-                updated.getId()
-        );
+        jooq.update(TODOS)
+                .set(TODOS.DESCRIPTION, updated.getDescription())
+                .set(TODOS.TITLE, updated.getTitle())
+                .where(TODOS.ID.equal(updated.getId()))
+                .execute();
 
         LOGGER.info("Todo: {} was updated", updated);
     }
@@ -70,11 +68,11 @@ public class JOOQTodoRepository implements TodoRepository {
     public void updateAndThrowException(Todo updated) {
         LOGGER.info("Updating todo: {}", updated);
 
-        jooq.execute("update todos set description=?, title=? where id=?",
-                updated.getDescription(),
-                updated.getTitle(),
-                updated.getId()
-        );
+        jooq.update(TODOS)
+                .set(TODOS.DESCRIPTION, updated.getDescription())
+                .set(TODOS.TITLE, updated.getTitle())
+                .where(TODOS.ID.equal(updated.getId()))
+                .execute();
 
         LOGGER.info("Todo: {} was updated", updated);
 
