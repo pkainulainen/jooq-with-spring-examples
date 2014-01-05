@@ -54,11 +54,13 @@ public class JOOQTodoRepository implements TodoRepository {
     public void update(Todo updated) {
         LOGGER.info("Updating todo: {}", updated);
 
-        jooq.update(TODOS)
+        int updatedRowCount = jooq.update(TODOS)
                 .set(TODOS.DESCRIPTION, updated.getDescription())
                 .set(TODOS.TITLE, updated.getTitle())
                 .where(TODOS.ID.equal(updated.getId()))
                 .execute();
+
+        LOGGER.debug("Updated {} rows.", updatedRowCount);
 
         LOGGER.info("Todo: {} was updated", updated);
     }
@@ -68,11 +70,13 @@ public class JOOQTodoRepository implements TodoRepository {
     public void updateAndThrowException(Todo updated) {
         LOGGER.info("Updating todo: {}", updated);
 
-        jooq.update(TODOS)
+        int updatedRowCount = jooq.update(TODOS)
                 .set(TODOS.DESCRIPTION, updated.getDescription())
                 .set(TODOS.TITLE, updated.getTitle())
                 .where(TODOS.ID.equal(updated.getId()))
                 .execute();
+
+        LOGGER.debug("Updated {} rows.", updatedRowCount);
 
         LOGGER.info("Todo: {} was updated", updated);
 
