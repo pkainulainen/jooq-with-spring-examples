@@ -240,12 +240,10 @@
                             <name>org.jooq.util.h2.H2Database</name>
                             <includes>.*</includes>
                             <excludes></excludes>
-                            <dateAsTimestamp>true</dateAsTimestamp>
                             <inputSchema>PUBLIC</inputSchema>
                         </database>
                         <generate>
-                            <deprecated>false</deprecated>
-                            <instanceFields>true</instanceFields>
+                            <daos>true</daos>
                             <pojos>true</pojos>
                         </generate>
                         <target>
