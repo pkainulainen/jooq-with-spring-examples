@@ -119,8 +119,8 @@ public class ITTodoControllerTest {
     @ExpectedDatabase(value="/net/petrikainulainen/spring/jooq/todo/todo-data-add.xml", assertionMode = DatabaseAssertionMode.NON_STRICT)
     public void add_TodoEntryAdded_ShouldReturnAddedToEntryAsJsonDocument() throws Exception {
         TodoDTO addedTodoEntry = new TodoDTOBuilder()
-                .description(IntegrationTestConstants.NEW_TITLE)
-                .title(IntegrationTestConstants.NEW_DESCRIPTION)
+                .description(IntegrationTestConstants.NEW_DESCRIPTION)
+                .title(IntegrationTestConstants.NEW_TITLE)
                 .build();
 
         mockMvc.perform(post("/api/todo")

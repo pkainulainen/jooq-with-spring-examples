@@ -16,7 +16,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.petrikainulainen.spring.jooq.todo.db.Sequences.TODO_SEQUENCE;
 import static net.petrikainulainen.spring.jooq.todo.db.tables.Todos.TODOS;
 
 /**
@@ -54,9 +53,6 @@ public class JOOQTodoRepository implements TodoRepository {
     }
 
     private TodosRecord createRecord(Todo todoEntry) {
-        Long id = jooq.nextval(TODO_SEQUENCE);
-        LOGGER.debug("The id of the added todo entry is: {}", id);
-
         Timestamp currentTime = dateTimeService.getCurrentTimestamp();
         LOGGER.debug("The current time is: {}", currentTime);
 
@@ -64,7 +60,6 @@ public class JOOQTodoRepository implements TodoRepository {
 
         record.setCreationTime(currentTime);
         record.setDescription(todoEntry.getDescription());
-        record.setId(id);
         record.setModificationTime(currentTime);
         record.setTitle(todoEntry.getTitle());
 
