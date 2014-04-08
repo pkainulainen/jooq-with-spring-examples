@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -22,7 +21,6 @@ import static net.petrikainulainen.spring.jooq.todo.db.tables.Todos.TODOS;
  * @author Petri Kainulainen
  */
 @Repository
-@Transactional(propagation = Propagation.REQUIRED)
 public class JOOQTodoRepository implements TodoRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JOOQTodoRepository.class);
@@ -37,6 +35,7 @@ public class JOOQTodoRepository implements TodoRepository {
         this.jooq = jooq;
     }
 
+    @Transactional
     @Override
     public Todo add(Todo todoEntry) {
         LOGGER.info("Adding new todo entry with information: {}", todoEntry);
