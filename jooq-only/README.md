@@ -1,6 +1,6 @@
 This is an example application of my blog posts:
 
-Using jOOQ with Spring: CRUD - Not published yet.
+* [Using jOOQ with Spring: CRUD](http://www.petrikainulainen.net/programming/jooq/using-jooq-with-spring-crud/)
 
 RUNNING THE TESTS:
 
