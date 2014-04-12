@@ -4,7 +4,7 @@ import net.petrikainulainen.spring.jooq.common.service.DateTimeService;
 import net.petrikainulainen.spring.jooq.todo.db.tables.records.TodosRecord;
 import net.petrikainulainen.spring.jooq.todo.exception.TodoNotFoundException;
 import net.petrikainulainen.spring.jooq.todo.model.Todo;
-import org.jooq.impl.DefaultDSLContext;
+import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +27,10 @@ public class JOOQTodoRepository implements TodoRepository {
 
     private final DateTimeService dateTimeService;
 
-    private final DefaultDSLContext jooq;
+    private final DSLContext jooq;
 
     @Autowired
-    public JOOQTodoRepository(DateTimeService dateTimeService, DefaultDSLContext jooq) {
+    public JOOQTodoRepository(DateTimeService dateTimeService, DSLContext jooq) {
         this.dateTimeService = dateTimeService;
         this.jooq = jooq;
     }
