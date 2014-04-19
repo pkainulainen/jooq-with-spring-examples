@@ -38,6 +38,8 @@ public interface TodoRepository {
      */
     public Todo findById(Long id);
 
+    public List<Todo> findBySearchTerm(String searchTerm);
+
     /**
      * Updates the information of a todo entry.
      * @param todoEntry   The new information of a todo entry.

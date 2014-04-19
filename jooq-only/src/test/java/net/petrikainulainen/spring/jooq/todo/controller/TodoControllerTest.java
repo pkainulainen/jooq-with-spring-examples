@@ -9,6 +9,7 @@ import net.petrikainulainen.spring.jooq.todo.dto.TodoDTO;
 import net.petrikainulainen.spring.jooq.todo.dto.TodoDTOBuilder;
 import net.petrikainulainen.spring.jooq.todo.exception.TodoNotFoundException;
 import net.petrikainulainen.spring.jooq.todo.service.TodoCrudService;
+import net.petrikainulainen.spring.jooq.todo.service.TodoSearchService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static net.petrikainulainen.spring.jooq.todo.dto.TodoDTOAssert.assertThatTodoDTO;
@@ -58,6 +60,7 @@ public class TodoControllerTest {
     private static final Long ID = 1L;
     private static final String MODIFICATION_TIME = TestDateUtil.CURRENT_TIMESTAMP;
     private static final String TITLE = "title";
+    private static final String SEARCH_TERM = "IT";
 
     private MockMvc mockMvc;
 
@@ -68,11 +71,14 @@ public class TodoControllerTest {
     private TodoCrudService todoCrudServiceMock;
 
     @Autowired
+    private TodoSearchService todoSearchServiceMock;
+
+    @Autowired
     private WebApplicationContext webAppContext;
 
     @Before
     public void setUp() {
-        Mockito.reset(todoCrudServiceMock);
+        Mockito.reset(todoCrudServiceMock, todoSearchServiceMock);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webAppContext).build();
     }
@@ -94,7 +100,7 @@ public class TodoControllerTest {
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorCode", contains(WebTestConstants.ERROR_CODE_NOT_EMPTY)))
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorMessage", not(isEmptyOrNullString())));
 
-        verifyZeroInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoCrudServiceMock, todoSearchServiceMock);
     }
 
     @Test
@@ -122,7 +128,7 @@ public class TodoControllerTest {
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorCode", contains(WebTestConstants.ERROR_CODE_LENGTH)))
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorMessage", not(isEmptyOrNullString())));
 
-        verifyZeroInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoCrudServiceMock, todoSearchServiceMock);
     }
 
     @Test
@@ -158,6 +164,7 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).add(serviceMethodArgument.capture());
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
 
         TodoDTO serviceMethodArgumentValue = serviceMethodArgument.getValue();
         assertThatTodoDTO(serviceMethodArgumentValue)
@@ -174,6 +181,10 @@ public class TodoControllerTest {
 
         mockMvc.perform(delete("/api/todo/{id}", ID))
                 .andExpect(status().isNotFound());
+
+        verify(todoCrudServiceMock, times(1)).delete(ID);
+        verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
     }
 
     @Test
@@ -199,6 +210,21 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).delete(ID);
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
+    }
+
+    @Test
+    public void findAll_NoTodoEntriesFound_ShouldReturnEmptyListAsJSonDocument() throws Exception {
+        when(todoCrudServiceMock.findAll()).thenReturn(new ArrayList<TodoDTO>());
+
+        mockMvc.perform(get("/api/todo"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(todoCrudServiceMock, times(1)).findAll();
+        verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
     }
 
     @Test
@@ -225,6 +251,7 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).findAll();
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
     }
 
     @Test
@@ -250,6 +277,7 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).findById(ID);
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
     }
 
     @Test
@@ -261,6 +289,52 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).findById(ID);
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
+    }
+
+    @Test
+    public void findBySearchTerm_NoTodoEntriesFound_ShouldReturnEmptyListAsJsonDocument() throws Exception {
+        when(todoSearchServiceMock.findBySearchTerm(SEARCH_TERM)).thenReturn(new ArrayList<TodoDTO>());
+
+        mockMvc.perform(get("/api/todo/search")
+                        .param("searchTerm", SEARCH_TERM)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(todoSearchServiceMock, times(1)).findBySearchTerm(SEARCH_TERM);
+        verifyNoMoreInteractions(todoSearchServiceMock);
+        verifyZeroInteractions(todoCrudServiceMock);
+    }
+
+    @Test
+    public void findBySearchTerm_OneTodoEntryFound_ShouldReturnTodoEntriesAsJsonDocument() throws Exception {
+        TodoDTO foundTodoEntry = new TodoDTOBuilder()
+                .creationTime(CREATION_TIME)
+                .description(DESCRIPTION)
+                .id(ID)
+                .modificationTime(MODIFICATION_TIME)
+                .title(TITLE)
+                .build();
+
+        when(todoSearchServiceMock.findBySearchTerm(SEARCH_TERM)).thenReturn(Arrays.asList(foundTodoEntry));
+
+        mockMvc.perform(get("/api/todo/search")
+                .param("searchTerm", SEARCH_TERM)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(ID.intValue())))
+                .andExpect(jsonPath("$[0].creationTime", is(CREATION_TIME)))
+                .andExpect(jsonPath("$[0].description", is(DESCRIPTION)))
+                .andExpect(jsonPath("$[0].modificationTime", is(MODIFICATION_TIME)))
+                .andExpect(jsonPath("$[0].title", is(TITLE)));
+
+        verify(todoSearchServiceMock, times(1)).findBySearchTerm(SEARCH_TERM);
+        verifyNoMoreInteractions(todoSearchServiceMock);
+        verifyZeroInteractions(todoCrudServiceMock);
     }
 
     @Test
@@ -280,7 +354,7 @@ public class TodoControllerTest {
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorCode", contains(WebTestConstants.ERROR_CODE_NOT_EMPTY)))
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorMessage", not(isEmptyOrNullString())));
 
-        verifyZeroInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoCrudServiceMock, todoSearchServiceMock);
     }
 
     @Test
@@ -308,7 +382,7 @@ public class TodoControllerTest {
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorCode", contains(WebTestConstants.ERROR_CODE_LENGTH)))
                 .andExpect(jsonPath("$.validationErrors[?(@.field=='title')].errorMessage", not(isEmptyOrNullString())));
 
-        verifyZeroInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoCrudServiceMock, todoSearchServiceMock);
     }
 
     @Test
@@ -330,6 +404,7 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).update(serviceMethodArgument.capture());
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
 
         TodoDTO serviceMethodArgumentValue = serviceMethodArgument.getValue();
         assertThatTodoDTO(serviceMethodArgumentValue)
@@ -373,6 +448,7 @@ public class TodoControllerTest {
 
         verify(todoCrudServiceMock, times(1)).update(serviceMethodArgument.capture());
         verifyNoMoreInteractions(todoCrudServiceMock);
+        verifyZeroInteractions(todoSearchServiceMock);
 
         TodoDTO serviceMethodArgumentValue = serviceMethodArgument.getValue();
         assertThatTodoDTO(serviceMethodArgumentValue)

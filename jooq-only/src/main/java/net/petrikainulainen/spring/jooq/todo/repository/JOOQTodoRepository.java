@@ -87,14 +87,9 @@ public class JOOQTodoRepository implements TodoRepository {
     public List<Todo> findAll() {
         LOGGER.info("Finding all todo entries.");
 
-        List<Todo> todoEntries = new ArrayList<>();
-
         List<TodosRecord> queryResults = jooq.selectFrom(TODOS).fetchInto(TodosRecord.class);
 
-        for (TodosRecord queryResult: queryResults) {
-            Todo todoEntry = convertQueryResultToModelObject(queryResult);
-            todoEntries.add(todoEntry);
-        }
+        List<Todo> todoEntries = convertQueryResultsToModelObjects(queryResults);
 
         LOGGER.info("Found {} todo entries", todoEntries.size());
 
@@ -104,7 +99,7 @@ public class JOOQTodoRepository implements TodoRepository {
     @Transactional(readOnly = true)
     @Override
     public Todo findById(Long id) {
-        LOGGER.info("Finding todo by id: {}", id);
+        LOGGER.info("Finding todo entry by id: {}", id);
 
         TodosRecord queryResult = jooq.selectFrom(TODOS)
                 .where(TODOS.ID.equal(id))
@@ -117,6 +112,38 @@ public class JOOQTodoRepository implements TodoRepository {
         }
 
         return convertQueryResultToModelObject(queryResult);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Todo> findBySearchTerm(String searchTerm) {
+        LOGGER.info("Finding todo entries by search term: {}", searchTerm);
+
+        String likeExpression = "%" + searchTerm + "%";
+
+        List<TodosRecord> queryResults = jooq.selectFrom(TODOS)
+                .where(
+                        TODOS.DESCRIPTION.likeIgnoreCase(likeExpression)
+                                .or(TODOS.TITLE.likeIgnoreCase(likeExpression))
+                )
+                .fetchInto(TodosRecord.class);
+
+        List<Todo> todoEntries = convertQueryResultsToModelObjects(queryResults);
+
+        LOGGER.info("Found {} todo entries", todoEntries.size());
+
+        return todoEntries;
+    }
+
+    private List<Todo> convertQueryResultsToModelObjects(List<TodosRecord> queryResults) {
+        List<Todo> todoEntries = new ArrayList<>();
+
+        for (TodosRecord queryResult: queryResults) {
+            Todo todoEntry = convertQueryResultToModelObject(queryResult);
+            todoEntries.add(todoEntry);
+        }
+
+        return todoEntries;
     }
 
     private Todo convertQueryResultToModelObject(TodosRecord queryResult) {

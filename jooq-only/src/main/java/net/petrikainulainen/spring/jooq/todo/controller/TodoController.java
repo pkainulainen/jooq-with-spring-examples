@@ -2,6 +2,7 @@ package net.petrikainulainen.spring.jooq.todo.controller;
 
 import net.petrikainulainen.spring.jooq.todo.dto.TodoDTO;
 import net.petrikainulainen.spring.jooq.todo.service.TodoCrudService;
+import net.petrikainulainen.spring.jooq.todo.service.TodoSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,9 +29,12 @@ public class TodoController {
 
     private final TodoCrudService crudService;
 
+    private final TodoSearchService searchService;
+
     @Autowired
-    public TodoController(TodoCrudService crudService) {
+    public TodoController(TodoCrudService crudService, TodoSearchService searchService) {
         this.crudService = crudService;
+        this.searchService = searchService;
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -75,6 +80,17 @@ public class TodoController {
         LOGGER.info("Found todo entry: {}", found);
 
         return found;
+    }
+
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public List<TodoDTO> findBySearchTerm(@RequestParam("searchTerm") String searchTerm) {
+        LOGGER.info("Finding todo entry by search term: {}", searchTerm);
+
+        List<TodoDTO> todoEntries = searchService.findBySearchTerm(searchTerm);
+
+        LOGGER.info("Found {} todo entries", todoEntries.size());
+
+        return todoEntries;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)

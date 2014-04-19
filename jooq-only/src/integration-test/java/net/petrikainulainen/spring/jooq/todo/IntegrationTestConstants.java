@@ -10,7 +10,7 @@ public class IntegrationTestConstants {
     public static final String CURRENT_CREATION_TIME = "2012-10-21 11:13:28";
     public static final String CURRENT_DESCRIPTION = "Lorem ipsum";
     public static final String CURRENT_MODIFICATION_TIME = "2012-10-21 11:13:28";
-    public static final String CURRENT_TITLE_FIRST_TODO = "Foo";
+    public static final String CURRENT_TITLE_FIRST_TODO = "FooRai";
     public static final String CURRENT_TITLE_SECOND_TODO = "Bar";
 
     public static final Long ID_FIRST_TODO = 1L;
@@ -20,4 +20,8 @@ public class IntegrationTestConstants {
     public static final String NEW_DESCRIPTION = "description";
     public static final String NEW_MODIFICATION_TIME = TestDateUtil.CURRENT_TIMESTAMP;
     public static final String NEW_TITLE = "title";
+
+    public static final String SEARCH_TERM = "rA";
+
+    private IntegrationTestConstants() {}
 }

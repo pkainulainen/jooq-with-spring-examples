@@ -59,9 +59,17 @@ public class ITJOOQTodoRepositoryTest {
     }
 
     @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
+    public void delete_TodoEntryNotFound_ShouldDeleteTodo() {
+        catchException(repository).delete(IntegrationTestConstants.ID_FIRST_TODO);
+        assertThat(caughtException()).isExactlyInstanceOf(TodoNotFoundException.class);
+    }
+
+    @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data-deleted.xml")
-    public void delete_TodoFound_ShouldDeleteTodo() {
+    public void delete_TodoEntryFound_ShouldDeleteTodo() {
         Todo deletedTodoEntry = repository.delete(IntegrationTestConstants.ID_FIRST_TODO);
 
         assertThatTodo(deletedTodoEntry)
@@ -73,9 +81,17 @@ public class ITJOOQTodoRepositoryTest {
     }
 
     @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
+    public void findAll_NoTodoEntriesFound_ShouldReturnEmptyList() {
+        List<Todo> todoEntries = repository.findAll();
+        assertThat(todoEntries).isEmpty();
+    }
+
+    @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
-    public void findAll_TwoTodosFound_ShouldReturnTwoTodoEntries() {
+    public void findAll_TwoTodoEntriesFound_ShouldReturnTwoTodoEntries() {
         List<Todo> todoEntries = repository.findAll();
 
         assertThat(todoEntries).hasSize(2);
@@ -100,7 +116,7 @@ public class ITJOOQTodoRepositoryTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
-    public void findById_TodoFound_ShouldReturnTodo() {
+    public void findById_TodoEntryFound_ShouldReturnTodo() {
         Todo foundTodoEntry = repository.findById(1L);
 
         assertThatTodo(foundTodoEntry)
@@ -114,7 +130,7 @@ public class ITJOOQTodoRepositoryTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
-    public void findById_TodoNotFound_ShouldThrowException() {
+    public void findById_TodoEntryNotFound_ShouldThrowException() {
         catchException(repository).findById(IntegrationTestConstants.ID_FIRST_TODO);
         assertThat(caughtException()).isExactlyInstanceOf(TodoNotFoundException.class);
     }
@@ -122,7 +138,31 @@ public class ITJOOQTodoRepositoryTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
-    public void update_TodoNotFound_ShouldThrowException() {
+    public void findBySearchTerm_TodoEntriesNotFound_ShouldReturnEmptyList() {
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM);
+        assertThat(todoEntries).isEmpty();
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_OneTodoEntryFound_ShouldReturnFoundTodo() {
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM);
+        assertThat(todoEntries).hasSize(1);
+
+        Todo foundTodoEntry = todoEntries.get(0);
+        assertThatTodo(foundTodoEntry)
+                .hasId(IntegrationTestConstants.ID_FIRST_TODO)
+                .hasDescription(IntegrationTestConstants.CURRENT_DESCRIPTION)
+                .hasTitle(IntegrationTestConstants.CURRENT_TITLE_FIRST_TODO)
+                .wasCreatedAt(IntegrationTestConstants.CURRENT_CREATION_TIME)
+                .wasModifiedAt(IntegrationTestConstants.CURRENT_MODIFICATION_TIME);
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
+    public void update_TodoEntryNotFound_ShouldThrowException() {
         Todo updatedTodoEntry = Todo.getBuilder("title")
                 .description("description")
                 .id(IntegrationTestConstants.ID_SECOND_TODO)
@@ -135,7 +175,7 @@ public class ITJOOQTodoRepositoryTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase(value="/net/petrikainulainen/spring/jooq/todo/todo-data-updated.xml", assertionMode = DatabaseAssertionMode.NON_STRICT)
-    public void update_TodoFound_ShouldUpdateTodo() {
+    public void update_TodoEntryFound_ShouldUpdateTodo() {
         Todo updatedTodoEntry = Todo.getBuilder(IntegrationTestConstants.NEW_TITLE)
                 .description(IntegrationTestConstants.NEW_DESCRIPTION)
                 .id(IntegrationTestConstants.ID_SECOND_TODO)
