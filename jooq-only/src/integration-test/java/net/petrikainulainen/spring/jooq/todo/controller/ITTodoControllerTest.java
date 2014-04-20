@@ -215,7 +215,7 @@ public class ITTodoControllerTest {
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/empty-todo-data.xml")
     public void findBySearchTerm_NoTodoEntriesFound_ShouldReturnEmptyListAsJsonDocument() throws Exception {
         mockMvc.perform(get("/api/todo/search")
-                .param("searchTerm", IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -225,9 +225,11 @@ public class ITTodoControllerTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
-    public void findBySearchTerm_OneTodoEntryFound_ShouldReturnTodoEntriesAsJsonDocument() throws Exception {
+    public void findBySearchTerm_FirstPageWithPageSizeOne_TwoTodoEntriesExist_ShouldReturnFirstTodoEntryAsJsonDocument() throws Exception {
         mockMvc.perform(get("/api/todo/search")
-                .param("searchTerm", IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "0")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -237,6 +239,39 @@ public class ITTodoControllerTest {
                 .andExpect(jsonPath("$[0].description", is(IntegrationTestConstants.CURRENT_DESCRIPTION)))
                 .andExpect(jsonPath("$[0].modificationTime", is(IntegrationTestConstants.CURRENT_MODIFICATION_TIME)))
                 .andExpect(jsonPath("$[0].title", is(IntegrationTestConstants.CURRENT_TITLE_FIRST_TODO)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExist_ShouldReturnSecondTodoEntryAsJsonDocument() throws Exception {
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "1")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(IntegrationTestConstants.ID_SECOND_TODO.intValue())))
+                .andExpect(jsonPath("$[0].creationTime", is(IntegrationTestConstants.CURRENT_CREATION_TIME)))
+                .andExpect(jsonPath("$[0].description", is(IntegrationTestConstants.CURRENT_DESCRIPTION)))
+                .andExpect(jsonPath("$[0].modificationTime", is(IntegrationTestConstants.CURRENT_MODIFICATION_TIME)))
+                .andExpect(jsonPath("$[0].title", is(IntegrationTestConstants.CURRENT_TITLE_SECOND_TODO)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_ThirdPageWithPageSizeOne_TwoTodoEntriesExist_ShouldReturnEmptyListAsJsonDocument() throws Exception {
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "2")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test

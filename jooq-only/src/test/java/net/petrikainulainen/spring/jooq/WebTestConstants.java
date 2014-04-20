@@ -13,4 +13,13 @@ public class WebTestConstants {
 
     public static final String ERROR_CODE_NOT_EMPTY = "NotEmpty";
     public static final String ERROR_CODE_LENGTH = "Length";
+
+    public static final String REQUEST_PARAM_PAGE_NUMBER = "page";
+    public static final String REQUEST_PARAM_PAGE_SIZE = "size";
+    public static final String REQUEST_PARAM_SEARCH_TERM = "searchTerm";
+    public static final String REQUEST_PARAM_SORT_FIELD = "sort";
+    public static final String REQUEST_PARAM_SORT_ORDER = "sort.dir";
+
+    private WebTestConstants() {
+    }
 }

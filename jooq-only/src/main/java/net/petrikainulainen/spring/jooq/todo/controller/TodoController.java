@@ -6,6 +6,7 @@ import net.petrikainulainen.spring.jooq.todo.service.TodoSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -83,10 +84,14 @@ public class TodoController {
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public List<TodoDTO> findBySearchTerm(@RequestParam("searchTerm") String searchTerm) {
-        LOGGER.info("Finding todo entry by search term: {}", searchTerm);
+    public List<TodoDTO> findBySearchTerm(@RequestParam("searchTerm") String searchTerm, Pageable pageable) {
+        LOGGER.info("Finding {} todo entries for page {} by using search term: {}",
+                pageable.getPageSize(),
+                pageable.getPageNumber(),
+                searchTerm
+        );
 
-        List<TodoDTO> todoEntries = searchService.findBySearchTerm(searchTerm);
+        List<TodoDTO> todoEntries = searchService.findBySearchTerm(searchTerm, pageable);
 
         LOGGER.info("Found {} todo entries", todoEntries.size());
 

@@ -8,6 +8,7 @@ import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,8 +117,12 @@ public class JOOQTodoRepository implements TodoRepository {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Todo> findBySearchTerm(String searchTerm) {
-        LOGGER.info("Finding todo entries by search term: {}", searchTerm);
+    public List<Todo> findBySearchTerm(String searchTerm, Pageable pageable) {
+        LOGGER.info("Finding {} todo entries for page {} by using search term: {}",
+                pageable.getPageSize(),
+                pageable.getPageNumber(),
+                searchTerm
+        );
 
         String likeExpression = "%" + searchTerm + "%";
 
@@ -126,6 +131,7 @@ public class JOOQTodoRepository implements TodoRepository {
                         TODOS.DESCRIPTION.likeIgnoreCase(likeExpression)
                                 .or(TODOS.TITLE.likeIgnoreCase(likeExpression))
                 )
+                .limit(pageable.getPageSize()).offset(pageable.getOffset())
                 .fetchInto(TodosRecord.class);
 
         List<Todo> todoEntries = convertQueryResultsToModelObjects(queryResults);

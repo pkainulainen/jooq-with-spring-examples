@@ -30,6 +30,7 @@
             More details: https://github.com/springtestdbunit/spring-test-dbunit/issues/46
         -->
         <spring.version>4.0.2.RELEASE</spring.version>
+        <spring.data.commons.version>1.7.1.RELEASE</spring.data.commons.version>
         <build.profile.id>dev</build.profile.id>
         <skip.db.creation>false</skip.db.creation>
         <skip.integration.tests>true</skip.integration.tests>
@@ -340,6 +341,13 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
+        </dependency>
+
+        <!-- Spring Data Commons -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>${spring.data.commons.version}</version>
         </dependency>
 
         <dependency>

@@ -16,6 +16,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -28,11 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static net.petrikainulainen.spring.jooq.todo.dto.TodoDTOAssert.assertThatTodoDTO;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,6 +65,13 @@ public class TodoControllerTest {
     private static final String MODIFICATION_TIME = TestDateUtil.CURRENT_TIMESTAMP;
     private static final String TITLE = "title";
     private static final String SEARCH_TERM = "IT";
+
+    private static final int PAGE_NUMBER = 0;
+    private static final String PAGE_NUMBER_STRING = PAGE_NUMBER + "";
+    private static final int PAGE_SIZE = 10;
+    private static final String PAGE_SIZE_STRING = PAGE_SIZE + "";
+    private static final String SORT_FIELD = "id";
+    private static final String SORT_ORDER = "ASC";
 
     private MockMvc mockMvc;
 
@@ -294,18 +305,33 @@ public class TodoControllerTest {
 
     @Test
     public void findBySearchTerm_NoTodoEntriesFound_ShouldReturnEmptyListAsJsonDocument() throws Exception {
-        when(todoSearchServiceMock.findBySearchTerm(SEARCH_TERM)).thenReturn(new ArrayList<TodoDTO>());
+        when(todoSearchServiceMock.findBySearchTerm(eq(SEARCH_TERM), isA(Pageable.class))).thenReturn(new ArrayList<TodoDTO>());
 
         mockMvc.perform(get("/api/todo/search")
-                        .param("searchTerm", SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, PAGE_NUMBER_STRING)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, PAGE_SIZE_STRING)
+                .param(WebTestConstants.REQUEST_PARAM_SORT_FIELD, SORT_FIELD)
+                .param(WebTestConstants.REQUEST_PARAM_SORT_ORDER, SORT_ORDER)
+
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(todoSearchServiceMock, times(1)).findBySearchTerm(SEARCH_TERM);
+        ArgumentCaptor<Pageable> pageableArgument = ArgumentCaptor.forClass(Pageable.class);
+
+        verify(todoSearchServiceMock, times(1)).findBySearchTerm(eq(SEARCH_TERM), pageableArgument.capture());
         verifyNoMoreInteractions(todoSearchServiceMock);
         verifyZeroInteractions(todoCrudServiceMock);
+
+        Pageable pageSpecification = pageableArgument.getValue();
+
+        assertThat(pageSpecification.getPageNumber()).isEqualTo(PAGE_NUMBER);
+        assertThat(pageSpecification.getPageSize()).isEqualTo(PAGE_SIZE);
+
+        Sort sortSpecification = pageSpecification.getSort();
+        assertThat(sortSpecification.getOrderFor(SORT_FIELD).getDirection()).isEqualTo(Sort.Direction.fromString(SORT_ORDER));
     }
 
     @Test
@@ -318,10 +344,14 @@ public class TodoControllerTest {
                 .title(TITLE)
                 .build();
 
-        when(todoSearchServiceMock.findBySearchTerm(SEARCH_TERM)).thenReturn(Arrays.asList(foundTodoEntry));
+        when(todoSearchServiceMock.findBySearchTerm(eq(SEARCH_TERM), isA(Pageable.class))).thenReturn(Arrays.asList(foundTodoEntry));
 
         mockMvc.perform(get("/api/todo/search")
-                .param("searchTerm", SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, PAGE_NUMBER_STRING)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, PAGE_SIZE_STRING)
+                .param(WebTestConstants.REQUEST_PARAM_SORT_FIELD, SORT_FIELD)
+                .param(WebTestConstants.REQUEST_PARAM_SORT_ORDER, SORT_ORDER)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -332,9 +362,19 @@ public class TodoControllerTest {
                 .andExpect(jsonPath("$[0].modificationTime", is(MODIFICATION_TIME)))
                 .andExpect(jsonPath("$[0].title", is(TITLE)));
 
-        verify(todoSearchServiceMock, times(1)).findBySearchTerm(SEARCH_TERM);
+        ArgumentCaptor<Pageable> pageableArgument = ArgumentCaptor.forClass(Pageable.class);
+
+        verify(todoSearchServiceMock, times(1)).findBySearchTerm(eq(SEARCH_TERM), pageableArgument.capture());
         verifyNoMoreInteractions(todoSearchServiceMock);
         verifyZeroInteractions(todoCrudServiceMock);
+
+        Pageable pageSpecification = pageableArgument.getValue();
+
+        assertThat(pageSpecification.getPageNumber()).isEqualTo(PAGE_NUMBER);
+        assertThat(pageSpecification.getPageSize()).isEqualTo(PAGE_SIZE);
+
+        Sort sortSpecification = pageSpecification.getSort();
+        assertThat(sortSpecification.getOrderFor(SORT_FIELD).getDirection()).isEqualTo(Sort.Direction.fromString(SORT_ORDER));
     }
 
     @Test

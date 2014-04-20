@@ -7,6 +7,7 @@ import org.jtransfo.JTransfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +33,14 @@ public class RepositoryTodoSearchService implements TodoSearchService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<TodoDTO> findBySearchTerm(String searchTerm) {
-        LOGGER.info("Finding todo entry by using search term: {}", searchTerm);
+    public List<TodoDTO> findBySearchTerm(String searchTerm, Pageable pageable) {
+        LOGGER.info("Finding {} todo entries for page {} by using search term: {}",
+                pageable.getPageSize(),
+                pageable.getPageNumber(),
+                searchTerm
+        );
 
-        List<Todo> searchResults = repository.findBySearchTerm(searchTerm);
+        List<Todo> searchResults = repository.findBySearchTerm(searchTerm, pageable);
         LOGGER.info("Found {} todo entries", searchResults.size());
 
         return transformer.convertList(searchResults, TodoDTO.class);

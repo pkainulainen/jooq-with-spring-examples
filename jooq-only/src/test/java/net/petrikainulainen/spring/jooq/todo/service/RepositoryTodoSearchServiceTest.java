@@ -11,10 +11,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,6 +45,9 @@ public class RepositoryTodoSearchServiceTest {
     private static final String SEARCH_TERM = "title";
 
     @Mock
+    private Pageable pageableMock;
+
+    @Mock
     private TodoRepository repositoryMock;
 
     private RepositoryTodoSearchService service;
@@ -58,7 +63,19 @@ public class RepositoryTodoSearchServiceTest {
     }
 
     @Test
-    public void searchBySearchTerm_OneTodoEntryFound_ShouldReturnFoundTodoEntry() {
+    public void findBySearchTerm_NoTodoEntriesFound_ShouldReturnEmptyList() {
+        when(repositoryMock.findBySearchTerm(SEARCH_TERM, pageableMock)).thenReturn(new ArrayList<Todo>());
+
+        List<TodoDTO> searchResults = service.findBySearchTerm(SEARCH_TERM, pageableMock);
+
+        verify(repositoryMock, times(1)).findBySearchTerm(SEARCH_TERM, pageableMock);
+        verifyNoMoreInteractions(repositoryMock);
+
+        assertThat(searchResults).isEmpty();
+    }
+
+    @Test
+    public void findBySearchTerm_OneTodoEntryFound_ShouldReturnFoundTodoEntry() {
         Todo expectedTodoEntry = Todo.getBuilder(TITLE)
                 .creationTime(CREATION_TIME)
                 .description(DESCRIPTION)
@@ -66,11 +83,11 @@ public class RepositoryTodoSearchServiceTest {
                 .modificationTime(MODIFICATION_TIME)
                 .build();
 
-        when(repositoryMock.findBySearchTerm(SEARCH_TERM)).thenReturn(Arrays.asList(expectedTodoEntry));
+        when(repositoryMock.findBySearchTerm(SEARCH_TERM, pageableMock)).thenReturn(Arrays.asList(expectedTodoEntry));
 
-        List<TodoDTO> searchResults = service.findBySearchTerm(SEARCH_TERM);
+        List<TodoDTO> searchResults = service.findBySearchTerm(SEARCH_TERM, pageableMock);
 
-        verify(repositoryMock, times(1)).findBySearchTerm(SEARCH_TERM);
+        verify(repositoryMock, times(1)).findBySearchTerm(SEARCH_TERM, pageableMock);
         verifyNoMoreInteractions(repositoryMock);
 
         assertThat(searchResults).hasSize(1);

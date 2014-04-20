@@ -21,7 +21,7 @@ public class IntegrationTestConstants {
     public static final String NEW_MODIFICATION_TIME = TestDateUtil.CURRENT_TIMESTAMP;
     public static final String NEW_TITLE = "title";
 
-    public static final String SEARCH_TERM = "rA";
+    public static final String SEARCH_TERM = "ipsum";
 
     private IntegrationTestConstants() {}
 }
