@@ -5,15 +5,22 @@ import net.petrikainulainen.spring.jooq.todo.db.tables.records.TodosRecord;
 import net.petrikainulainen.spring.jooq.todo.exception.TodoNotFoundException;
 import net.petrikainulainen.spring.jooq.todo.model.Todo;
 import org.jooq.DSLContext;
+import org.jooq.SortField;
+import org.jooq.TableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import static net.petrikainulainen.spring.jooq.todo.db.tables.Todos.TODOS;
@@ -131,6 +138,7 @@ public class JOOQTodoRepository implements TodoRepository {
                         TODOS.DESCRIPTION.likeIgnoreCase(likeExpression)
                                 .or(TODOS.TITLE.likeIgnoreCase(likeExpression))
                 )
+                .orderBy(getSortFields(pageable.getSort()))
                 .limit(pageable.getPageSize()).offset(pageable.getOffset())
                 .fetchInto(TodosRecord.class);
 
@@ -141,10 +149,56 @@ public class JOOQTodoRepository implements TodoRepository {
         return todoEntries;
     }
 
+    private Collection<SortField<?>> getSortFields(Sort sortSpecification) {
+        LOGGER.debug("Getting sort fields from sort specification: {}", sortSpecification);
+        Collection<SortField<?>> querySortFields = new ArrayList<>();
+
+        if (sortSpecification == null) {
+            LOGGER.debug("No sort specification found. Returning empty collection -> no sorting is done.");
+            return querySortFields;
+        }
+
+        Iterator<Sort.Order> specifiedFields = sortSpecification.iterator();
+
+        while (specifiedFields.hasNext()) {
+            Sort.Order specifiedField = specifiedFields.next();
+
+            String sortFieldName = specifiedField.getProperty();
+            Sort.Direction sortDirection = specifiedField.getDirection();
+            LOGGER.debug("Getting sort field with name: {} and direction: {}", sortFieldName, sortDirection);
+
+            TableField tableField = getTableField(sortFieldName);
+            SortField<?> querySortField;
+
+            if (sortDirection == Sort.Direction.ASC) {
+                querySortField = tableField.asc();
+            } else {
+                querySortField = tableField.desc();
+            }
+
+            querySortFields.add(querySortField);
+        }
+
+        return querySortFields;
+    }
+
+    private TableField getTableField(String sortFieldName) {
+        TableField sortField = null;
+        try {
+            Field tableField = TODOS.getClass().getField(sortFieldName);
+            sortField = (TableField) tableField.get(TODOS);
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            String errorMessage = String.format("Could not find table field: {}", sortFieldName);
+            throw new InvalidDataAccessApiUsageException(errorMessage, ex);
+        }
+
+        return sortField;
+    }
+
     private List<Todo> convertQueryResultsToModelObjects(List<TodosRecord> queryResults) {
         List<Todo> todoEntries = new ArrayList<>();
 
-        for (TodosRecord queryResult: queryResults) {
+        for (TodosRecord queryResult : queryResults) {
             Todo todoEntry = convertQueryResultToModelObject(queryResult);
             todoEntries.add(todoEntry);
         }

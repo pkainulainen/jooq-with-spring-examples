@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -163,6 +164,44 @@ public class ITJOOQTodoRepositoryTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_FirstPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleAsc_ShouldReturnSecondTodoEntry() {
+        Sort sortSpecification = new Sort(new Sort.Order(Sort.Direction.ASC, IntegrationTestConstants.SORT_FIELD_NAME));
+        PageRequest pageSpecification = new PageRequest(0, 1, sortSpecification);
+
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, pageSpecification);
+        assertThat(todoEntries).hasSize(1);
+
+        Todo foundTodoEntry = todoEntries.get(0);
+        assertThatTodo(foundTodoEntry)
+                .hasId(IntegrationTestConstants.ID_SECOND_TODO)
+                .hasDescription(IntegrationTestConstants.CURRENT_DESCRIPTION)
+                .hasTitle(IntegrationTestConstants.CURRENT_TITLE_SECOND_TODO)
+                .wasCreatedAt(IntegrationTestConstants.CURRENT_CREATION_TIME)
+                .wasModifiedAt(IntegrationTestConstants.CURRENT_MODIFICATION_TIME);
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_FirstPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleDesc_ShouldReturnFirstTodoEntry() {
+        Sort sortSpecification = new Sort(new Sort.Order(Sort.Direction.DESC, IntegrationTestConstants.SORT_FIELD_NAME));
+        PageRequest pageSpecification = new PageRequest(0, 1, sortSpecification);
+
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, pageSpecification);
+        assertThat(todoEntries).hasSize(1);
+
+        Todo foundTodoEntry = todoEntries.get(0);
+        assertThatTodo(foundTodoEntry)
+                .hasId(IntegrationTestConstants.ID_FIRST_TODO)
+                .hasDescription(IntegrationTestConstants.CURRENT_DESCRIPTION)
+                .hasTitle(IntegrationTestConstants.CURRENT_TITLE_FIRST_TODO)
+                .wasCreatedAt(IntegrationTestConstants.CURRENT_CREATION_TIME)
+                .wasModifiedAt(IntegrationTestConstants.CURRENT_MODIFICATION_TIME);
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExist_ShouldReturnSecondTodoEntry() {
         List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, new PageRequest(1, 1));
         assertThat(todoEntries).hasSize(1);
@@ -179,8 +218,68 @@ public class ITJOOQTodoRepositoryTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleAsc_ShouldReturnFirstTodoEntry() {
+        Sort sortSpecification = new Sort(new Sort.Order(Sort.Direction.ASC, IntegrationTestConstants.SORT_FIELD_NAME));
+        PageRequest pageSpecification = new PageRequest(1, 1, sortSpecification);
+
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, pageSpecification);
+        assertThat(todoEntries).hasSize(1);
+
+        Todo foundTodoEntry = todoEntries.get(0);
+        assertThatTodo(foundTodoEntry)
+                .hasId(IntegrationTestConstants.ID_FIRST_TODO)
+                .hasDescription(IntegrationTestConstants.CURRENT_DESCRIPTION)
+                .hasTitle(IntegrationTestConstants.CURRENT_TITLE_FIRST_TODO)
+                .wasCreatedAt(IntegrationTestConstants.CURRENT_CREATION_TIME)
+                .wasModifiedAt(IntegrationTestConstants.CURRENT_MODIFICATION_TIME);
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleDesc_ShouldReturnSecondTodoEntry() {
+        Sort sortSpecification = new Sort(new Sort.Order(Sort.Direction.DESC, IntegrationTestConstants.SORT_FIELD_NAME));
+        PageRequest pageSpecification = new PageRequest(1, 1, sortSpecification);
+
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, pageSpecification);
+        assertThat(todoEntries).hasSize(1);
+
+        Todo foundTodoEntry = todoEntries.get(0);
+        assertThatTodo(foundTodoEntry)
+                .hasId(IntegrationTestConstants.ID_SECOND_TODO)
+                .hasDescription(IntegrationTestConstants.CURRENT_DESCRIPTION)
+                .hasTitle(IntegrationTestConstants.CURRENT_TITLE_SECOND_TODO)
+                .wasCreatedAt(IntegrationTestConstants.CURRENT_CREATION_TIME)
+                .wasModifiedAt(IntegrationTestConstants.CURRENT_MODIFICATION_TIME);
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     public void findBySearchTerm_ThirdPageWithPageSizeOne_TwoTodoEntriesExist_ShouldReturnEmptyList() {
         List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, new PageRequest(2, 1));
+        assertThat(todoEntries).isEmpty();
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_ThirdPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleAsc_ShouldReturnEmptyList() {
+        Sort sortSpecification = new Sort(new Sort.Order(Sort.Direction.ASC, IntegrationTestConstants.SORT_FIELD_NAME));
+        PageRequest pageSpecification = new PageRequest(2, 1, sortSpecification);
+
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, pageSpecification);
+        assertThat(todoEntries).isEmpty();
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_ThirdPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleDesc_ShouldReturnEmptyList() {
+        Sort sortSpecification = new Sort(new Sort.Order(Sort.Direction.DESC, IntegrationTestConstants.SORT_FIELD_NAME));
+        PageRequest pageSpecification = new PageRequest(2, 1, sortSpecification);
+
+        List<Todo> todoEntries = repository.findBySearchTerm(IntegrationTestConstants.SEARCH_TERM, pageSpecification);
         assertThat(todoEntries).isEmpty();
     }
 

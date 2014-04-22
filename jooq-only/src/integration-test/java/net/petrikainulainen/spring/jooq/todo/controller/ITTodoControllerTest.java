@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -244,11 +245,99 @@ public class ITTodoControllerTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_FirstPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleAsc_ShouldReturnSecondTodoEntryAsJsonDocument() throws Exception {
+        String sortParameterValue = WebTestUtil.createSortParameterValue(IntegrationTestConstants.SORT_FIELD_NAME, Sort.Direction.ASC.name());
+
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "0")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+                .param(WebTestConstants.REQUEST_PARAM_SORT, sortParameterValue)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(IntegrationTestConstants.ID_SECOND_TODO.intValue())))
+                .andExpect(jsonPath("$[0].creationTime", is(IntegrationTestConstants.CURRENT_CREATION_TIME)))
+                .andExpect(jsonPath("$[0].description", is(IntegrationTestConstants.CURRENT_DESCRIPTION)))
+                .andExpect(jsonPath("$[0].modificationTime", is(IntegrationTestConstants.CURRENT_MODIFICATION_TIME)))
+                .andExpect(jsonPath("$[0].title", is(IntegrationTestConstants.CURRENT_TITLE_SECOND_TODO)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_FirstPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleDesc_ShouldReturnFirstTodoEntryAsJsonDocument() throws Exception {
+        String sortParameterValue = WebTestUtil.createSortParameterValue(IntegrationTestConstants.SORT_FIELD_NAME, Sort.Direction.DESC.name());
+
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "0")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+                .param(WebTestConstants.REQUEST_PARAM_SORT, sortParameterValue)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(IntegrationTestConstants.ID_FIRST_TODO.intValue())))
+                .andExpect(jsonPath("$[0].creationTime", is(IntegrationTestConstants.CURRENT_CREATION_TIME)))
+                .andExpect(jsonPath("$[0].description", is(IntegrationTestConstants.CURRENT_DESCRIPTION)))
+                .andExpect(jsonPath("$[0].modificationTime", is(IntegrationTestConstants.CURRENT_MODIFICATION_TIME)))
+                .andExpect(jsonPath("$[0].title", is(IntegrationTestConstants.CURRENT_TITLE_FIRST_TODO)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExist_ShouldReturnSecondTodoEntryAsJsonDocument() throws Exception {
         mockMvc.perform(get("/api/todo/search")
                 .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
                 .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "1")
                 .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(IntegrationTestConstants.ID_SECOND_TODO.intValue())))
+                .andExpect(jsonPath("$[0].creationTime", is(IntegrationTestConstants.CURRENT_CREATION_TIME)))
+                .andExpect(jsonPath("$[0].description", is(IntegrationTestConstants.CURRENT_DESCRIPTION)))
+                .andExpect(jsonPath("$[0].modificationTime", is(IntegrationTestConstants.CURRENT_MODIFICATION_TIME)))
+                .andExpect(jsonPath("$[0].title", is(IntegrationTestConstants.CURRENT_TITLE_SECOND_TODO)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleAsc_ShouldReturnFirstTodoEntryAsJsonDocument() throws Exception {
+        String sortParameterValue = WebTestUtil.createSortParameterValue(IntegrationTestConstants.SORT_FIELD_NAME, Sort.Direction.ASC.name());
+
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "1")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+                .param(WebTestConstants.REQUEST_PARAM_SORT, sortParameterValue)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(IntegrationTestConstants.ID_FIRST_TODO.intValue())))
+                .andExpect(jsonPath("$[0].creationTime", is(IntegrationTestConstants.CURRENT_CREATION_TIME)))
+                .andExpect(jsonPath("$[0].description", is(IntegrationTestConstants.CURRENT_DESCRIPTION)))
+                .andExpect(jsonPath("$[0].modificationTime", is(IntegrationTestConstants.CURRENT_MODIFICATION_TIME)))
+                .andExpect(jsonPath("$[0].title", is(IntegrationTestConstants.CURRENT_TITLE_FIRST_TODO)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_SecondPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleDesc_ShouldReturnSecondTodoEntryAsJsonDocument() throws Exception {
+        String sortParameterValue = WebTestUtil.createSortParameterValue(IntegrationTestConstants.SORT_FIELD_NAME, Sort.Direction.DESC.name());
+
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "1")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+                .param(WebTestConstants.REQUEST_PARAM_SORT, sortParameterValue)
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -277,12 +366,46 @@ public class ITTodoControllerTest {
     @Test
     @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_ThirdPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleAsc_ShouldReturnEmptyListAsJsonDocument() throws Exception {
+        String sortParameterValue = WebTestUtil.createSortParameterValue(IntegrationTestConstants.SORT_FIELD_NAME, Sort.Direction.ASC.name());
+
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "2")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+                .param(WebTestConstants.REQUEST_PARAM_SORT, sortParameterValue)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    public void findBySearchTerm_ThirdPageWithPageSizeOne_TwoTodoEntriesExistAndSortedByTitleDesc_ShouldReturnEmptyListAsJsonDocument() throws Exception {
+        String sortParameterValue = WebTestUtil.createSortParameterValue(IntegrationTestConstants.SORT_FIELD_NAME, Sort.Direction.DESC.name());
+
+        mockMvc.perform(get("/api/todo/search")
+                .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, IntegrationTestConstants.SEARCH_TERM)
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, "2")
+                .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, "1")
+                .param(WebTestConstants.REQUEST_PARAM_SORT, sortParameterValue)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DatabaseSetup("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
+    @ExpectedDatabase("/net/petrikainulainen/spring/jooq/todo/todo-data.xml")
     public void update_EmptyTodoEntry_ShouldReturnValidationErrorAboutMissingTitleAsJsonDocument() throws Exception {
         TodoDTO updatedTodoEntry = new TodoDTO();
 
         mockMvc.perform(put("/api/todo/{id}", IntegrationTestConstants.ID_SECOND_TODO)
-                        .contentType(WebTestConstants.APPLICATION_JSON_UTF8)
-                        .content(objectMapper.writeValueAsBytes(updatedTodoEntry))
+                .contentType(WebTestConstants.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsBytes(updatedTodoEntry))
         )
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -307,8 +430,8 @@ public class ITTodoControllerTest {
                 .build();
 
         mockMvc.perform(put("/api/todo/{id}", IntegrationTestConstants.ID_SECOND_TODO)
-                        .contentType(WebTestConstants.APPLICATION_JSON_UTF8)
-                        .content(objectMapper.writeValueAsBytes(updatedTodoEntry))
+                .contentType(WebTestConstants.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsBytes(updatedTodoEntry))
         )
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -332,8 +455,8 @@ public class ITTodoControllerTest {
                 .build();
 
         mockMvc.perform(put("/api/todo/{id}", IntegrationTestConstants.ID_SECOND_TODO)
-                        .contentType(WebTestConstants.APPLICATION_JSON_UTF8)
-                        .content(objectMapper.writeValueAsBytes(updatedTodoEntry))
+                .contentType(WebTestConstants.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsBytes(updatedTodoEntry))
         )
                 .andExpect(status().isNotFound());
     }

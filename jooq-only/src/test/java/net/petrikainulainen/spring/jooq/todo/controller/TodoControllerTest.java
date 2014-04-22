@@ -71,7 +71,7 @@ public class TodoControllerTest {
     private static final int PAGE_SIZE = 10;
     private static final String PAGE_SIZE_STRING = PAGE_SIZE + "";
     private static final String SORT_FIELD = "id";
-    private static final String SORT_ORDER = "ASC";
+    private static final String SORT_ORDER = "DESC";
 
     private MockMvc mockMvc;
 
@@ -311,9 +311,7 @@ public class TodoControllerTest {
                 .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, SEARCH_TERM)
                 .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, PAGE_NUMBER_STRING)
                 .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, PAGE_SIZE_STRING)
-                .param(WebTestConstants.REQUEST_PARAM_SORT_FIELD, SORT_FIELD)
-                .param(WebTestConstants.REQUEST_PARAM_SORT_ORDER, SORT_ORDER)
-
+                .param(WebTestConstants.REQUEST_PARAM_SORT, WebTestUtil.createSortParameterValue(SORT_FIELD, SORT_ORDER))
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
@@ -350,8 +348,7 @@ public class TodoControllerTest {
                 .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, SEARCH_TERM)
                 .param(WebTestConstants.REQUEST_PARAM_PAGE_NUMBER, PAGE_NUMBER_STRING)
                 .param(WebTestConstants.REQUEST_PARAM_PAGE_SIZE, PAGE_SIZE_STRING)
-                .param(WebTestConstants.REQUEST_PARAM_SORT_FIELD, SORT_FIELD)
-                .param(WebTestConstants.REQUEST_PARAM_SORT_ORDER, SORT_ORDER)
+                .param(WebTestConstants.REQUEST_PARAM_SORT, WebTestUtil.createSortParameterValue(SORT_FIELD, SORT_ORDER))
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))

@@ -14,4 +14,8 @@ public class WebTestUtil {
 
         return string.toString();
     }
+
+    public static String createSortParameterValue(String sortField, String sortOrder) {
+        return sortField + "," + sortOrder;
+    }
 }
