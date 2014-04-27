@@ -168,14 +168,7 @@ public class JOOQTodoRepository implements TodoRepository {
             LOGGER.debug("Getting sort field with name: {} and direction: {}", sortFieldName, sortDirection);
 
             TableField tableField = getTableField(sortFieldName);
-            SortField<?> querySortField;
-
-            if (sortDirection == Sort.Direction.ASC) {
-                querySortField = tableField.asc();
-            } else {
-                querySortField = tableField.desc();
-            }
-
+            SortField<?> querySortField = convertTableFieldToSortField(tableField, sortDirection);
             querySortFields.add(querySortField);
         }
 
@@ -193,6 +186,15 @@ public class JOOQTodoRepository implements TodoRepository {
         }
 
         return sortField;
+    }
+
+    private SortField<?> convertTableFieldToSortField(TableField tableField, Sort.Direction sortDirection) {
+        if (sortDirection == Sort.Direction.ASC) {
+            return tableField.asc();
+        }
+        else {
+            return tableField.desc();
+        }
     }
 
     private List<Todo> convertQueryResultsToModelObjects(List<TodosRecord> queryResults) {
