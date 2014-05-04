@@ -1,0 +1,47 @@
+{
+    "app.title.label": "jOOQ Example",
+    "dialogs": {
+        "delete.dialog.cancel.button.label": "Cancel",
+        "delete.dialog.delete.button.label": "Delete",
+        "delete.dialog.title": "Delete Todo Entry?",
+        "delete.dialog.text.prefix": "Are you sure that you want to delete the todo entry:"
+    },
+    "footer.message": "jOOQ example application by Petri Kainulainen",
+    "header.brand.label": "jOOQ Example",
+    "pages": {
+        "add": {
+            "page.title": "New Todo Entry",
+            "save.todo.button": "Save"
+        },
+        "edit.page": {
+            "title": "Edit Todo Entry"
+        },
+        "list.page": {
+            "add.button.label": "Add",
+            "title": "Things to do"
+        },
+        "view.page": {
+            "delete.button.label": "Delete",
+            "edit.button.label": "Edit",
+            "title": "View Todo Entry"
+        }
+    },
+    "todo": {
+        "creation.time": "Created at",
+        "description": "Description",
+        "description.placeholder": "Enter description",
+        "modification.time": "Modified at",
+        "notifications": {
+            "add.success": "A new todo entry was added",
+            "delete.success": "Todo Entry was deleted",
+            "update.success": "The information of the todo entry was updated"
+        },
+        "messages": {
+            "description.maxLength": "Description cannot be longer than 500 characters",
+            "title.maxLength": "Title cannot be longer than 100 characters",
+            "title.required": "Title is required"
+        },
+        "title": "Title",
+        "title.placeholder": "Enter title"
+    }
+}

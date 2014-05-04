@@ -1,0 +1,8 @@
+<div ui-view>
+    <h1 translate="pages.list.page.title"></h1>
+    <button type="button" class="btn btn-primary" translate="pages.list.page.add.button.label" ng-click="addTodo()"></button>
+    <div class="well well-sm" ng-repeat="todo in todos">
+        <a ui-sref="todo.view({todoId: todo.id})">{{todo.title}}</a>
+    </div>
+    <button type="button" class="btn btn-primary" translate="pages.list.page.add.button.label" ng-click="addTodo()"></button>
+</div>

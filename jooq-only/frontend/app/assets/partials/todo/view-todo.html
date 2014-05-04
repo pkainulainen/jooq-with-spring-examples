@@ -1,0 +1,20 @@
+<div>
+    <h1 translate="pages.view.page.title"></h1>
+
+    <div class="well well-lg">
+        <h2>{{todo.title}}</h2>
+        <div><p>{{todo.description}}</p></div>
+        <div>
+            <p>
+                <small>
+                    {{"todo.creation.time" | translate}}: {{todo.creationTime | amDateFormat:'DD.MM.YYYY HH:mm:ss'}}
+                    {{"todo.modification.time" | translate }}: {{todo.modificationTime | amDateFormat:'DD.MM.YYYY HH:mm:ss'}}
+                </small>
+            </p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" translate="pages.view.page.edit.button.label" ng-click="showEditPage()"></button>
+            <button type="button" class="btn btn-danger" translate="pages.view.page.delete.button.label" ng-click="showDeleteDialog()"></button>
+        </div>
+    </div>
+</div>

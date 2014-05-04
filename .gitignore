@@ -4,3 +4,6 @@ target
 .idea
 .DS_Store
 socialConfig.properties
+node_modules
+bower_components
+_public

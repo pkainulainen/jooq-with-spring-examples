@@ -64,7 +64,7 @@
         </repository>
     </repositories>
     <build>
-        <finalName>integration-testing</finalName>
+        <finalName>jooq</finalName>
         <filters>
             <filter>profiles/${build.profile.id}/config.properties</filter>
         </filters>
@@ -265,13 +265,36 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <warName>ROOT</warName>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>frontend/_public/frontend</directory>
+                            <targetPath>/frontend</targetPath>
+                            <filtering>false</filtering>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>8.1.14.v20131031</version>
+                <version>9.1.1.v20140108</version>
                 <configuration>
                     <stopKey>todostop</stopKey>
                     <stopPort>9999</stopPort>
                     <systemPropertiesFile>profiles/${build.profile.id}/system.properties</systemPropertiesFile>
+                    <webAppConfig>
+                        <war>${basedir}/target/jooq.war</war>
+                        <contextPath>/</contextPath>
+                        <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+                            <resourcesAsCSV>src/main/webapp,frontend/_public</resourcesAsCSV>
+                        </baseResource>
+                    </webAppConfig>
                 </configuration>
             </plugin>
         </plugins>
@@ -451,6 +474,12 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
         </dependency>
 
         <!-- TESTING DEPENDENCIES -->
