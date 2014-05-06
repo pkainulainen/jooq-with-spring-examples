@@ -17,13 +17,13 @@ Prerequisites
 You need to install the following tools in order to run this application:
 
 Backend
-========
+---------
 
 * [JDK 7](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 * [Maven 3](http://maven.apache.org/)
 
 Frontend
-=========
+----------
 
 * [Node.js](http://nodejs.org/)
 * [NPM](https://www.npmjs.org/)
