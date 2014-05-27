@@ -21,7 +21,7 @@ angular.module('app.todo.controllers', [])
                     resolve: {
                         updatedTodo: ['Todos', '$stateParams', function(Todos, $stateParams) {
                             if ($stateParams.todoId) {
-                                return Todos.get({id: $stateParams.todoId}).$promise;
+                                return Todos.get($stateParams.todoId);
                             }
                             return null;
                         }]
@@ -34,7 +34,7 @@ angular.module('app.todo.controllers', [])
                     resolve: {
                         viewedTodo: ['Todos', '$stateParams', function(Todos, $stateParams) {
                             if ($stateParams.todoId) {
-                                return Todos.get({id: $stateParams.todoId}).$promise;
+                                return Todos.get($stateParams.todoId);
                             }
                             return null;
                         }]
@@ -51,47 +51,44 @@ angular.module('app.todo.controllers', [])
                 $state.go('todo.add');
             };
         }])
-    .controller('AddTodoController', ['$scope', '$state', 'Todos', 'NotificationService',
-        function($scope, $state, Todos, NotificationService) {
+    .controller('AddTodoController', ['$scope', '$state', 'Todos',
+        function($scope, $state, Todos) {
             $scope.todo = {};
 
             $scope.saveTodo = function() {
                 if ($scope.todoForm.$valid) {
-                    var onSuccess = function() {
-                        NotificationService.flashMessage('todo.notifications.add.success', 'success');
-                        $state.go('todo.view', {todoId: $scope.todo.id}, { reload: true, inherit: true, notify: true });
+                    var onSuccess = function(added) {
+                        $state.go('todo.view', {todoId: added.id}, { reload: true, inherit: true, notify: true });
                     };
 
                     Todos.save($scope.todo, onSuccess);
                 }
             };
         }])
-    .controller('DeleteTodoController', ['$scope', '$modalInstance', '$state', 'Todos', 'NotificationService', 'deletedTodo',
-        function($scope, $modalInstance, $state, Todos, NotificationService, deletedTodo) {
+    .controller('DeleteTodoController', ['$scope', '$modalInstance', '$state', 'Todos', 'deletedTodo',
+        function($scope, $modalInstance, $state, Todos, deletedTodo) {
             $scope.todo = deletedTodo;
 
             $scope.cancel = function() {
                 $modalInstance.dismiss('cancel');
-            }
+            };
 
             $scope.delete = function() {
                 var onSuccess = function() {
                     $modalInstance.close();
-                    NotificationService.flashMessage('todo.notifications.delete.success', 'success');
                     $state.go('todo', {}, { reload: true, inherit: true, notify: true });
-                }
+                };
                 Todos.delete($scope.todo, onSuccess);
-            }
+            };
         }])
-    .controller('EditTodoController', ['$scope', '$state', 'updatedTodo', 'Todos', 'NotificationService',
-        function($scope, $state, updatedTodo, Todos, NotificationService) {
+    .controller('EditTodoController', ['$scope', '$state', 'updatedTodo', 'Todos',
+        function($scope, $state, updatedTodo, Todos) {
             $scope.todo = updatedTodo;
 
             $scope.saveTodo = function() {
                 if ($scope.todoForm.$valid) {
-                    var onSuccess = function() {
-                        NotificationService.flashMessage('todo.notifications.update.success', 'success');
-                        $state.go('todo.view', {todoId: $scope.todo.id}, { reload: true, inherit: true, notify: true });
+                    var onSuccess = function(updated) {
+                        $state.go('todo.view', {todoId: updated.id}, { reload: true, inherit: true, notify: true });
                     };
 
                     Todos.update($scope.todo, onSuccess);
