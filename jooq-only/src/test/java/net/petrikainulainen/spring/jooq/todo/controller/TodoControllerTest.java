@@ -5,6 +5,7 @@ import net.petrikainulainen.spring.jooq.WebTestConstants;
 import net.petrikainulainen.spring.jooq.WebTestUtil;
 import net.petrikainulainen.spring.jooq.common.TestDateUtil;
 import net.petrikainulainen.spring.jooq.config.WebUnitTestContext;
+import net.petrikainulainen.spring.jooq.todo.PageBuilder;
 import net.petrikainulainen.spring.jooq.todo.dto.TodoDTO;
 import net.petrikainulainen.spring.jooq.todo.dto.TodoDTOBuilder;
 import net.petrikainulainen.spring.jooq.todo.exception.TodoNotFoundException;
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,6 +75,11 @@ public class TodoControllerTest {
     private static final String PAGE_SIZE_STRING = PAGE_SIZE + "";
     private static final String SORT_FIELD = "id";
     private static final String SORT_ORDER = "DESC";
+    private static final long TOTAL_NUMBER_OF_ITEMS = 1L;
+    private static final int ONE_ITEM_FOUND = 1;
+    private static final int ONE_PAGE_FOUND = 1;
+    private static final int ZERO_ITEMS_FOUND = 0;
+    private static final int ZERO_PAGES_FOUND = 0;
 
     private MockMvc mockMvc;
 
@@ -304,8 +312,14 @@ public class TodoControllerTest {
     }
 
     @Test
-    public void findBySearchTerm_NoTodoEntriesFound_ShouldReturnEmptyListAsJsonDocument() throws Exception {
-        when(todoSearchServiceMock.findBySearchTerm(eq(SEARCH_TERM), isA(Pageable.class))).thenReturn(new ArrayList<TodoDTO>());
+    public void findBySearchTerm_NoTodoEntriesFound_ShouldReturnAnEmptyPageAsJsonDocument() throws Exception {
+        Page<TodoDTO> searchResults = new PageBuilder<TodoDTO>()
+                .pageNumber(PAGE_NUMBER)
+                .pageSize(PAGE_SIZE)
+                .totalNumberOfItems(ZERO_ITEMS_FOUND)
+                .build();
+
+        when(todoSearchServiceMock.findBySearchTerm(eq(SEARCH_TERM), isA(Pageable.class))).thenReturn(searchResults);
 
         mockMvc.perform(get("/api/todo/search")
                 .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, SEARCH_TERM)
@@ -315,7 +329,15 @@ public class TodoControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.number", is(PAGE_NUMBER)))
+                .andExpect(jsonPath("$.size", is(PAGE_SIZE)))
+                .andExpect(jsonPath("$.numberOfElements", is(ZERO_ITEMS_FOUND)))
+                .andExpect(jsonPath("$.firstPage", is(true)))
+                .andExpect(jsonPath("$.lastPage", is(true)))
+                .andExpect(jsonPath("$.totalPages", is(ZERO_PAGES_FOUND)))
+                .andExpect(jsonPath("$.totalElements", is(ZERO_ITEMS_FOUND)))
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andDo(print());
 
         ArgumentCaptor<Pageable> pageableArgument = ArgumentCaptor.forClass(Pageable.class);
 
@@ -342,7 +364,14 @@ public class TodoControllerTest {
                 .title(TITLE)
                 .build();
 
-        when(todoSearchServiceMock.findBySearchTerm(eq(SEARCH_TERM), isA(Pageable.class))).thenReturn(Arrays.asList(foundTodoEntry));
+        Page<TodoDTO> searchResults = new PageBuilder<TodoDTO>()
+                .itemsOnPage(foundTodoEntry)
+                .pageNumber(PAGE_NUMBER)
+                .pageSize(PAGE_SIZE)
+                .totalNumberOfItems(TOTAL_NUMBER_OF_ITEMS)
+                .build();
+
+        when(todoSearchServiceMock.findBySearchTerm(eq(SEARCH_TERM), isA(Pageable.class))).thenReturn(searchResults);
 
         mockMvc.perform(get("/api/todo/search")
                 .param(WebTestConstants.REQUEST_PARAM_SEARCH_TERM, SEARCH_TERM)
@@ -352,12 +381,19 @@ public class TodoControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(WebTestConstants.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(ID.intValue())))
-                .andExpect(jsonPath("$[0].creationTime", is(CREATION_TIME)))
-                .andExpect(jsonPath("$[0].description", is(DESCRIPTION)))
-                .andExpect(jsonPath("$[0].modificationTime", is(MODIFICATION_TIME)))
-                .andExpect(jsonPath("$[0].title", is(TITLE)));
+                .andExpect(jsonPath("$.number", is(PAGE_NUMBER)))
+                .andExpect(jsonPath("$.size", is(PAGE_SIZE)))
+                .andExpect(jsonPath("$.numberOfElements", is(ONE_ITEM_FOUND)))
+                .andExpect(jsonPath("$.firstPage", is(true)))
+                .andExpect(jsonPath("$.lastPage", is(true)))
+                .andExpect(jsonPath("$.totalPages", is(ONE_PAGE_FOUND)))
+                .andExpect(jsonPath("$.totalElements", is(ONE_ITEM_FOUND)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id", is(ID.intValue())))
+                .andExpect(jsonPath("$.content[0].creationTime", is(CREATION_TIME)))
+                .andExpect(jsonPath("$.content[0].description", is(DESCRIPTION)))
+                .andExpect(jsonPath("$.content[0].modificationTime", is(MODIFICATION_TIME)))
+                .andExpect(jsonPath("$.content[0].title", is(TITLE)));
 
         ArgumentCaptor<Pageable> pageableArgument = ArgumentCaptor.forClass(Pageable.class);
 

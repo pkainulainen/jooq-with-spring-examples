@@ -53,11 +53,7 @@
                 <a class="navbar-brand" href="#" translate="header.brand.label"></a>
             </div>
             <div class="collapse navbar-collapse">
-                <form class="navbar-form navbar-right" role="search">
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search">
-                    </div>
-                </form>
+                <div ng-include="'frontend/partials/search/search-form.html'"></div>
             </div>
         </div>
     </nav>

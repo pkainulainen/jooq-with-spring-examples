@@ -4,6 +4,7 @@ import net.petrikainulainen.spring.jooq.common.service.DateTimeService;
 import net.petrikainulainen.spring.jooq.todo.db.tables.records.TodosRecord;
 import net.petrikainulainen.spring.jooq.todo.exception.TodoNotFoundException;
 import net.petrikainulainen.spring.jooq.todo.model.Todo;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SortField;
 import org.jooq.TableField;
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -124,7 +127,7 @@ public class JOOQTodoRepository implements TodoRepository {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Todo> findBySearchTerm(String searchTerm, Pageable pageable) {
+    public Page<Todo> findBySearchTerm(String searchTerm, Pageable pageable) {
         LOGGER.info("Finding {} todo entries for page {} by using search term: {}",
                 pageable.getPageSize(),
                 pageable.getPageNumber(),
@@ -134,19 +137,45 @@ public class JOOQTodoRepository implements TodoRepository {
         String likeExpression = "%" + searchTerm + "%";
 
         List<TodosRecord> queryResults = jooq.selectFrom(TODOS)
-                .where(
-                        TODOS.DESCRIPTION.likeIgnoreCase(likeExpression)
-                                .or(TODOS.TITLE.likeIgnoreCase(likeExpression))
-                )
+                .where(createWhereConditions(likeExpression))
                 .orderBy(getSortFields(pageable.getSort()))
                 .limit(pageable.getPageSize()).offset(pageable.getOffset())
                 .fetchInto(TodosRecord.class);
 
         List<Todo> todoEntries = convertQueryResultsToModelObjects(queryResults);
 
-        LOGGER.info("Found {} todo entries", todoEntries.size());
+        LOGGER.info("Found {} todo entries for page: {}",
+                todoEntries.size(),
+                pageable.getPageNumber()
+        );
 
-        return todoEntries;
+        long totalCount = findCountByLikeExpression(likeExpression);
+
+        LOGGER.info("{} todo entries matches with the like expression: {}",
+                totalCount,
+                likeExpression
+        );
+
+        return new PageImpl<>(todoEntries, pageable, totalCount);
+    }
+
+    private long findCountByLikeExpression(String likeExpression) {
+        LOGGER.debug("Finding search result count by using like expression: {}", likeExpression);
+
+        long resultCount = jooq.fetchCount(
+                jooq.select()
+                        .from(TODOS)
+                        .where(createWhereConditions(likeExpression))
+        );
+
+        LOGGER.debug("Found search result count: {}", resultCount);
+
+        return resultCount;
+    }
+
+    private Condition createWhereConditions(String likeExpression) {
+        return TODOS.DESCRIPTION.likeIgnoreCase(likeExpression)
+                .or(TODOS.TITLE.likeIgnoreCase(likeExpression));
     }
 
     private Collection<SortField<?>> getSortFields(Sort sortSpecification) {

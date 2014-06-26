@@ -1,6 +1,7 @@
 package net.petrikainulainen.spring.jooq.todo.repository;
 
 import net.petrikainulainen.spring.jooq.todo.model.Todo;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public interface TodoRepository {
      */
     public Todo findById(Long id);
 
-    public List<Todo> findBySearchTerm(String searchTerm, Pageable pageable);
+    public Page<Todo> findBySearchTerm(String searchTerm, Pageable pageable);
 
     /**
      * Updates the information of a todo entry.

@@ -7,6 +7,9 @@ import org.jtransfo.JTransfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +36,24 @@ public class RepositoryTodoSearchService implements TodoSearchService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<TodoDTO> findBySearchTerm(String searchTerm, Pageable pageable) {
+    public Page<TodoDTO> findBySearchTerm(String searchTerm, Pageable pageable) {
         LOGGER.info("Finding {} todo entries for page {} by using search term: {}",
                 pageable.getPageSize(),
                 pageable.getPageNumber(),
                 searchTerm
         );
 
-        List<Todo> searchResults = repository.findBySearchTerm(searchTerm, pageable);
-        LOGGER.info("Found {} todo entries", searchResults.size());
+        Page<Todo> searchResults = repository.findBySearchTerm(searchTerm, pageable);
+        LOGGER.info("Found {} todo entries for page: {}",
+                searchResults.getNumberOfElements(),
+                searchResults.getNumber()
+        );
 
-        return transformer.convertList(searchResults, TodoDTO.class);
+        List<TodoDTO> dtos = transformer.convertList(searchResults.getContent(), TodoDTO.class);
+
+        return new PageImpl<>(dtos,
+                new PageRequest(searchResults.getNumber(), searchResults.getSize(), searchResults.getSort()),
+                searchResults.getTotalElements()
+        );
     }
 }
