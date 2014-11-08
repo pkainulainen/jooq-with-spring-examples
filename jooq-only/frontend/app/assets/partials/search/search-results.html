@@ -1,7 +1,10 @@
 <div>
     <h1 translate="pages.search.results.page.title"></h1>
     <div>
-        <div class="well well-sm" dir-paginate="todo in todos | itemsPerPage: 5" total-items="totalItems">
+        <div class="well well-sm"
+             dir-paginate="todo in todos | itemsPerPage: 5"
+             current-page="pagination.currentPage"
+             total-items="pagination.totalItems">
             <a ui-sref="todo.view({todoId: todo.id})">{{todo.title}}</a>
         </div>
 

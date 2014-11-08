@@ -162,10 +162,10 @@ angular.module('app.todo.controllers', [])
         function($scope, $state, searchTerm, searchResults) {
             console.log('Rendering search results page.');
             $scope.todos = searchResults.content;
-            $scope.totalItems = searchResults.totalElements;
 
             $scope.pagination = {
-                current: searchResults.number + 1
+                currentPage: searchResults.number + 1,
+                totalItems: searchResults.totalElements
             };
 
             $scope.pageChanged = function(newPageNumber) {
