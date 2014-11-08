@@ -5,7 +5,7 @@ angular.module('app.todo.controllers', [])
         function ($stateProvider) {
             $stateProvider
                 .state('todo', {
-                    url: '',
+                    url: '/',
                     abstract: true,
                     template: '<ui-view/>'
                 } )
