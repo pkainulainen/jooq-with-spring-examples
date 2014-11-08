@@ -12,7 +12,12 @@ angular.module('app.todo.controllers', [])
                 .state('todo.index', {
                     url: '',
                     controller: 'TodoListController',
-                    templateUrl: 'frontend/partials/todo/todo-list.html'
+                    templateUrl: 'frontend/partials/todo/todo-list.html',
+                    resolve: {
+                        todos: ['Todos', function(Todos) {
+                            return Todos.query();
+                        }]
+                    }
                 })
                 .state('todo.add', {
                     url: 'todo/add',
@@ -65,10 +70,10 @@ angular.module('app.todo.controllers', [])
         }
     ])
 
-    .controller('TodoListController', ['$scope', '$state', 'Todos',
-        function ($scope, $state, Todos) {
+    .controller('TodoListController', ['$scope', '$state', 'todos',
+        function ($scope, $state, todos) {
             console.log('Rendering todo entry list page.');
-            $scope.todos = Todos.query();
+            $scope.todos = todos;
 
             $scope.addTodo = function() {
                 $state.go('todo.add');
