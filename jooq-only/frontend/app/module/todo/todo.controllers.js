@@ -5,7 +5,12 @@ angular.module('app.todo.controllers', [])
         function ($stateProvider) {
             $stateProvider
                 .state('todo', {
-                    url: '/',
+                    url: '',
+                    abstract: true,
+                    template: '<ui-view/>'
+                } )
+                .state('todo.index', {
+                    url: '',
                     controller: 'TodoListController',
                     templateUrl: 'frontend/partials/todo/todo-list.html'
                 })
@@ -62,6 +67,7 @@ angular.module('app.todo.controllers', [])
 
     .controller('TodoListController', ['$scope', '$state', 'Todos',
         function ($scope, $state, Todos) {
+            console.log('Rendering todo entry list page.');
             $scope.todos = Todos.query();
 
             $scope.addTodo = function() {
@@ -70,6 +76,7 @@ angular.module('app.todo.controllers', [])
         }])
     .controller('AddTodoController', ['$scope', '$state', 'Todos',
         function($scope, $state, Todos) {
+            console.log('Rendering add todo entry page.');
             $scope.todo = {};
 
             $scope.saveTodo = function() {
@@ -93,13 +100,14 @@ angular.module('app.todo.controllers', [])
             $scope.delete = function() {
                 var onSuccess = function() {
                     $modalInstance.close();
-                    $state.go('todo', {}, { reload: true, inherit: true, notify: true });
+                    $state.go('todo.index', {}, { reload: true, inherit: true, notify: true });
                 };
                 Todos.delete($scope.todo, onSuccess);
             };
         }])
     .controller('EditTodoController', ['$scope', '$state', 'updatedTodo', 'Todos',
         function($scope, $state, updatedTodo, Todos) {
+            console.log('Rendering edit todo entry page.');
             $scope.todo = updatedTodo;
 
             $scope.saveTodo = function() {
@@ -152,6 +160,7 @@ angular.module('app.todo.controllers', [])
         }])
     .controller('SearchResultController', ['$scope', '$state', 'searchTerm', 'searchResults',
         function($scope, $state, searchTerm, searchResults) {
+            console.log('Rendering search results page.');
             $scope.todos = searchResults.content;
             $scope.totalItems = searchResults.totalElements;
 
@@ -165,6 +174,7 @@ angular.module('app.todo.controllers', [])
         }])
     .controller('ViewTodoController', ['$scope', '$state', '$modal', 'viewedTodo',
         function($scope, $state, $modal, viewedTodo) {
+            console.log('Rendering view todo entry page.');
             $scope.todo = viewedTodo;
 
             $scope.showEditPage = function() {
