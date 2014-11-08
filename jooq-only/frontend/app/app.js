@@ -13,6 +13,9 @@ var App = angular.module('app', [
     'angularMoment',
     'angularUtils.directives.dirPagination',
 
+    //Partials
+    'app.partials',
+
     //Common
     'app.common.config', 'app.common.directives', 'app.common.services',
 

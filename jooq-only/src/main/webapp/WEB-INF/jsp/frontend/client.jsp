@@ -14,14 +14,13 @@
     <link rel="stylesheet" href="${contextPath}/frontend/css/app.css">
 
     <!--[if lte IE 7]>
-    <script src="${contextPath}/static/lib/json3.min.js"></script>
+    <script src="${contextPath}/js/lib/json3.min.js"></script>
     <![endif]-->
 
     <!--[if lt IE 9]>
-    <script src="${contextPath}/static/lib/es5-shim.min.js"></script>
+    <script src="${contextPath}/js/lib/es5-shim.min.js"></script>
     <![endif]-->
 
-    <%--<script src="${contextPath}/static/lib/modernizr.js"></script>--%>
     <script>
         // include angular loader, which allows the files to load in any order
         <%@ include file="/static/lib/angular-loader.js" %>
@@ -30,7 +29,8 @@
         // load all of the dependencies asynchronously.
         $script([
             '${contextPath}/frontend/js/vendor.min.js',
-            '${contextPath}/frontend/js/app.min.js'
+            '${contextPath}/frontend/js/app.min.js',
+            '${contextPath}/frontend/js/partials.js'
         ], function () {
             // when all is done, execute bootstrap angular application
             angular.bootstrap(document, ['app']);
