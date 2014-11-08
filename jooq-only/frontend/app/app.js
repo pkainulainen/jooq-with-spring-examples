@@ -11,9 +11,13 @@ var App = angular.module('app', [
     'ui.utils',
     'angular-growl',
     'angularMoment',
+    'angularUtils.directives.dirPagination',
 
     //Common
     'app.common.config', 'app.common.directives', 'app.common.services',
+
+    //Search
+    'app.search.services',
 
     //Todo
     'app.todo.controllers', 'app.todo.services'

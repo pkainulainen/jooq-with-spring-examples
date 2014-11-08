@@ -20,11 +20,16 @@
             "add.button.label": "Add",
             "title": "Things to do"
         },
+        "search.results.page.title": "Search Results",
         "view.page": {
             "delete.button.label": "Delete",
             "edit.button.label": "Edit",
             "title": "View Todo Entry"
         }
+    },
+    "search": {
+        "term.field.placeholder": "Search",
+        "missing.characters.text": "characters missing"
     },
     "todo": {
         "creation.time": "Created at",

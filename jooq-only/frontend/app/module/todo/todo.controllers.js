@@ -27,6 +27,23 @@ angular.module('app.todo.controllers', [])
                         }]
                     }
                 })
+                .state('todo.search', {
+                    url: 'todo/search/:searchTerm/page/:pageNumber',
+                    controller: 'SearchResultController',
+                    templateUrl: 'frontend/partials/search/search-results.html',
+                    resolve: {
+                        searchTerm: ['$stateParams', function($stateParams) {
+                            return $stateParams.searchTerm;
+                        }],
+                        searchResults: ['Search', '$stateParams', function(Search, $stateParams) {
+                            if ($stateParams.searchTerm) {
+                                return Search.findBySearchTerm($stateParams.searchTerm, $stateParams.pageNumber - 1, 5);
+                            }
+
+                            return null;
+                        }]
+                    }
+                })
                 .state('todo.view', {
                     url: 'todo/:todoId',
                     controller: 'ViewTodoController',
@@ -93,6 +110,57 @@ angular.module('app.todo.controllers', [])
 
                     Todos.update($scope.todo, onSuccess);
                 }
+            };
+        }])
+    .controller('SearchController', ['$scope', '$state',
+        function ($scope, $state) {
+
+            var userWritingSearchTerm = false;
+            var minimumSearchTermLength = 3;
+
+            $scope.missingChars = minimumSearchTermLength;
+            $scope.searchTerm = "";
+
+            $scope.searchFieldBlur = function() {
+                userWritingSearchTerm = false;
+            };
+
+            $scope.searchFieldFocus = function() {
+                userWritingSearchTerm = true;
+            };
+
+            $scope.showMissingCharacterText = function() {
+                if (userWritingSearchTerm) {
+                    if ($scope.searchTerm.length < minimumSearchTermLength) {
+                        return true;
+                    }
+                }
+
+                return false;
+            };
+
+            $scope.search = function() {
+                if ($scope.searchTerm.length < minimumSearchTermLength) {
+                    $scope.missingChars = minimumSearchTermLength - $scope.searchTerm.length;
+                }
+                else {
+                    $scope.missingChars = 0;
+                    $state.go('todo.search', {searchTerm: $scope.searchTerm, pageNumber: 1}, { reload: true, inherit: true, notify: true });
+                }
+            };
+
+        }])
+    .controller('SearchResultController', ['$scope', '$state', 'searchTerm', 'searchResults',
+        function($scope, $state, searchTerm, searchResults) {
+            $scope.todos = searchResults.content;
+            $scope.totalItems = searchResults.totalElements;
+
+            $scope.pagination = {
+                current: searchResults.number + 1
+            };
+
+            $scope.pageChanged = function(newPageNumber) {
+                $state.go('todo.search', {searchTerm: searchTerm, pageNumber: newPageNumber}, { reload: true, inherit: true, notify: true });
             };
         }])
     .controller('ViewTodoController', ['$scope', '$state', '$modal', 'viewedTodo',

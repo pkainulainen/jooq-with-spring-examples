@@ -23,7 +23,8 @@ var vendorCodeFiles = [
     './bower_components/angular-ui-utils/ui-utils-ieshiv.min.js',
     './bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
     './bower_components/angular-growl/build/angular-growl.min.js',
-    './vendor/**/*.js'
+    './bower_components/angular-utils-pagination/dirPagination.js'
+
 ];
 
 var styleFiles = [
@@ -32,7 +33,9 @@ var styleFiles = [
 
 var appCodeFiles = "./app/**/*.js";
 var codeFiles = vendorCodeFiles.concat(appCodeFiles);
-var partialFiles = "./app/assets/partials/**/*.html";
+var partialFiles = [
+    './app/assets/partials/**/*.html'
+];
 var staticFiles = './app/assets/**';
 
 var pkg = require('./package.json');
