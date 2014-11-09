@@ -59,4 +59,7 @@ Running the Tests
 
         mvn clean verify -P integration-test
 
+Credits
+=========
 
+* Kyösti Herrala. The Gulp build script and its Maven integration are based on Kyösti's ideas.
