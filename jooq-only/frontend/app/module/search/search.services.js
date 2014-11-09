@@ -8,7 +8,7 @@ angular.module('app.search.services', ['ngResource'])
 
         return {
             findBySearchTerm: function(searchTerm, pageNumber, pageSize) {
-                return api.query({page: pageNumber, searchTerm: searchTerm, size: pageSize}).$promise;
+                return api.query({page: pageNumber, searchTerm: searchTerm, size: pageSize, sort: 'ID,DESC'}).$promise;
             }
         };
     }]);
