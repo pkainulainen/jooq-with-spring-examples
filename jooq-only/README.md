@@ -46,7 +46,10 @@ You can install these tools by following these steps:
 Running the Application
 =========================
 
-TBD
+After you have installed the tools that are required the build the application, you can run the application by invoking
+the following command on command prompt:
+
+        mvn jetty:run -P dev
 
 Running the Tests
 ===================
