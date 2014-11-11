@@ -1,6 +1,9 @@
 'use strict';
 
 angular.module('app.todo.controllers', [])
+    .constant('paginationConfig', {
+        pageSize: 5
+    })
     .config(['$stateProvider',
         function ($stateProvider) {
             $stateProvider
@@ -38,7 +41,7 @@ angular.module('app.todo.controllers', [])
                     }
                 })
                 .state('todo.search', {
-                    url: 'todo/search/:searchTerm/page/:pageNumber',
+                    url: 'todo/search/:searchTerm/page/:pageNumber/size/:pageSize',
                     controller: 'SearchResultController',
                     templateUrl: 'frontend/partials/search/search-results.html',
                     resolve: {
@@ -47,7 +50,7 @@ angular.module('app.todo.controllers', [])
                         }],
                         searchResults: ['Search', '$stateParams', function(Search, $stateParams) {
                             if ($stateParams.searchTerm) {
-                                return Search.findBySearchTerm($stateParams.searchTerm, $stateParams.pageNumber - 1, 5);
+                                return Search.findBySearchTerm($stateParams.searchTerm, $stateParams.pageNumber - 1, $stateParams.pageSize);
                             }
 
                             return null;
@@ -125,8 +128,8 @@ angular.module('app.todo.controllers', [])
                 }
             };
         }])
-    .controller('SearchController', ['$scope', '$state',
-        function ($scope, $state) {
+    .controller('SearchController', ['$scope', '$state', 'paginationConfig',
+        function ($scope, $state, paginationConfig) {
 
             var userWritingSearchTerm = false;
             var minimumSearchTermLength = 3;
@@ -158,23 +161,30 @@ angular.module('app.todo.controllers', [])
                 }
                 else {
                     $scope.missingChars = 0;
-                    $state.go('todo.search', {searchTerm: $scope.searchTerm, pageNumber: 1}, { reload: true, inherit: true, notify: true });
+                    $state.go('todo.search',
+                        {searchTerm: $scope.searchTerm, pageNumber: 1, pageSize: paginationConfig.pageSize},
+                        {reload: true, inherit: true, notify: true}
+                    );
                 }
             };
 
         }])
-    .controller('SearchResultController', ['$scope', '$state', 'searchTerm', 'searchResults',
-        function($scope, $state, searchTerm, searchResults) {
+    .controller('SearchResultController', ['$scope', '$state', 'paginationConfig', 'searchTerm', 'searchResults',
+        function($scope, $state, paginationConfig, searchTerm, searchResults) {
             console.log('Rendering search results page.');
             $scope.todos = searchResults.content;
 
             $scope.pagination = {
                 currentPage: searchResults.number + 1,
+                itemsPerPage: paginationConfig.pageSize,
                 totalItems: searchResults.totalElements
             };
 
             $scope.pageChanged = function(newPageNumber) {
-                $state.go('todo.search', {searchTerm: searchTerm, pageNumber: newPageNumber}, { reload: true, inherit: true, notify: true });
+                $state.go('todo.search',
+                    {searchTerm: searchTerm, pageNumber: newPageNumber, pageSize: paginationConfig.pageSize},
+                    {reload: true, inherit: true, notify: true}
+                );
             };
         }])
     .controller('ViewTodoController', ['$scope', '$state', '$modal', 'viewedTodo',
