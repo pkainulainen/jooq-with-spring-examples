@@ -22,14 +22,10 @@
         <jdk.version>1.7</jdk.version>
         <jsonpath.version>0.8.1</jsonpath.version>
         <jtransfo.version>0.12</jtransfo.version>
-        <jooq.version>3.3.2</jooq.version>
+        <jooq.version>3.4.4</jooq.version>
         <jooq.generator.db.dialect>org.jooq.util.h2.H2Database</jooq.generator.db.dialect>
         <slf4j.version>1.7.5</slf4j.version>
-        <!--
-            If you want to use spring-test-dbunit, you have to use Spring 3.2.6.
-            More details: https://github.com/springtestdbunit/spring-test-dbunit/issues/46
-        -->
-        <spring.version>4.0.2.RELEASE</spring.version>
+        <spring.version>4.1.2.RELEASE</spring.version>
         <spring.data.commons.version>1.7.1.RELEASE</spring.data.commons.version>
         <build.profile.id>dev</build.profile.id>
         <skip.db.creation>false</skip.db.creation>
