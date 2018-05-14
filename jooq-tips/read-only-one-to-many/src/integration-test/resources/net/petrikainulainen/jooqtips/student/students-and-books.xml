@@ -1,0 +1,10 @@
+<dataset>
+    <students id="1"
+              name="Petri Kainulainen"/>
+    <books id="1"
+           name="Learn Java in 21 Days"
+           student_id="1"/>
+    <books id="2"
+           name="Effective Java"
+           student_id="1"/>
+</dataset>
