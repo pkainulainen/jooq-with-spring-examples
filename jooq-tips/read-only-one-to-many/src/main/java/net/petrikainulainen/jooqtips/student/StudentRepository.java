@@ -99,8 +99,6 @@ class StudentRepository {
     }
 
     private Optional<StudentDTO> transformQueryResultIntoObject(ResultSet rs) {
-        //JdbcMapper<StudentDTO> jdbcMapper = createJdbcMapper();
-        //return jdbcMapper.map(rs);
         List<StudentDTO> students = transformQueryResultIntoList(rs);
         switch (students.size()) {
             case 0:
