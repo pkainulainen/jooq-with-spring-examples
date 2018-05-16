@@ -51,7 +51,7 @@ class StudentRepository {
         )
                 .from(STUDENTS)
                 .leftJoin(BOOKS).on(BOOKS.STUDENT_ID.eq(STUDENTS.ID))
-                .orderBy(STUDENTS.ID.asc(), BOOKS.ID.asc())
+                .orderBy(STUDENTS.ID.asc())
                 .fetchResultSet();
 
         List<StudentDTO> students = transformQueryResultIntoList(rs);
@@ -89,7 +89,6 @@ class StudentRepository {
                 .from(STUDENTS)
                 .leftJoin(BOOKS).on(BOOKS.STUDENT_ID.eq(STUDENTS.ID))
                 .where(STUDENTS.ID.eq(id))
-                .orderBy(BOOKS.ID.asc())
                 .fetchResultSet();
 
         Optional<StudentDTO> student = transformQueryResultIntoObject(rs);
