@@ -18,4 +18,10 @@ final class Students {
         static final Long ID = 1L;
         static final String NAME = "Petri Kainulainen";
     }
+
+    static class JaneDoe {
+
+        static final Long ID = 2L;
+        static final String NAME = "Jane Doe";
+    }
 }

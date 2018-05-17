@@ -22,4 +22,16 @@ final class Books {
         static final Long ID = 2L;
         static final String NAME = "Effective Java";
     }
+
+    static final class LearnCPlusPlusIn21Days {
+
+        static final Long ID = 3L;
+        static final String NAME = "Learn C++ in 21 Days";
+    }
+
+    static final class TheCPlusPlusProgrammingLanguage {
+
+        static final Long ID = 4L;
+        static final String NAME = "The C++ Programming Language";
+    }
 }

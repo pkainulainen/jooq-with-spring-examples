@@ -1,10 +1,18 @@
 <dataset>
     <students id="1"
               name="Petri Kainulainen"/>
+    <students id="2"
+              name="Jane Doe"/>
     <books id="1"
            name="Learn Java in 21 Days"
            student_id="1"/>
     <books id="2"
            name="Effective Java"
            student_id="1"/>
+    <books id="3"
+           name="Learn C++ in 21 Days"
+           student_id="2"/>
+    <books id="4"
+           name="The C++ Programming Language"
+           student_id="2"/>
 </dataset>
