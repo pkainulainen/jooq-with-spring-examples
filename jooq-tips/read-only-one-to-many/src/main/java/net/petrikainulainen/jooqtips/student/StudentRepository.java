@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,10 +27,16 @@ class StudentRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StudentRepository.class);
 
+    private final JdbcMapper<StudentDTO> jdbcMapper;
     private final DSLContext jooq;
 
     @Autowired
     StudentRepository(DSLContext jooq) {
+        this.jdbcMapper = JdbcMapperFactory
+                .newInstance()
+                .addKeys("id", "books_id")
+                .newMapper(StudentDTO.class);
+
         this.jooq = jooq;
     }
 
@@ -62,7 +69,6 @@ class StudentRepository {
 
     private List<StudentDTO> transformQueryResultIntoList(ResultSet rs) {
         try {
-            JdbcMapper<StudentDTO> jdbcMapper = createJdbcMapper();
             return jdbcMapper.stream(rs).collect(Collectors.toList());
         } catch (SQLException ex) {
             LOGGER.error("Cannot transform query result into a list because an error occurred", ex);
@@ -98,24 +104,22 @@ class StudentRepository {
     }
 
     private Optional<StudentDTO> transformQueryResultIntoObject(ResultSet rs) {
-        List<StudentDTO> students = transformQueryResultIntoList(rs);
-        switch (students.size()) {
-            case 0:
+        try {
+            Iterator<StudentDTO> students = jdbcMapper.iterator(rs);
+            if (!students.hasNext()) {
                 return Optional.empty();
-            case 1:
-                return Optional.of(students.get(0));
-            default:
-                throw new DataQueryException(
-                        "Cannot transform query result into an object because %d rows was found",
-                        students.size()
-                );
-        }
-    }
+            }
 
-    private JdbcMapper<StudentDTO> createJdbcMapper() {
-        return JdbcMapperFactory
-                .newInstance()
-                .addKeys("id", "books_id")
-                .newMapper(StudentDTO.class);
+            StudentDTO found = students.next();
+            if (students.hasNext()) {
+                throw new DataQueryException("Cannot transform query result into an object because multiple students were found");
+            }
+
+            return Optional.of(found);
+        }
+        catch (SQLException ex) {
+            LOGGER.error("Cannot transform query result into a list because an error occurred", ex);
+            throw new DataQueryException("Cannot transform query result into a list because an error occurred", ex);
+        }
     }
 }
