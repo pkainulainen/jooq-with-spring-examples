@@ -1,6 +1,7 @@
 package net.petrikainulainen.jooqtips.student;
 
 import org.jooq.DSLContext;
+import org.jooq.ResultQuery;
 import org.simpleflatmapper.jdbc.JdbcMapper;
 import org.simpleflatmapper.jdbc.JdbcMapperFactory;
 import org.slf4j.Logger;
@@ -51,24 +52,23 @@ class StudentRepository {
     public List<StudentDTO> findAll() {
         LOGGER.info("Finding all students");
 
-        ResultSet rs = jooq.select(STUDENTS.ID,
+        ResultQuery query = jooq.select(STUDENTS.ID,
                 STUDENTS.NAME,
                 BOOKS.ID.as("books_id"),
                 BOOKS.NAME.as("books_name")
         )
                 .from(STUDENTS)
                 .leftJoin(BOOKS).on(BOOKS.STUDENT_ID.eq(STUDENTS.ID))
-                .orderBy(STUDENTS.ID.asc())
-                .fetchResultSet();
+                .orderBy(STUDENTS.ID.asc());
 
-        List<StudentDTO> students = transformQueryResultIntoList(rs);
+        List<StudentDTO> students = transformQueryIntoList(query);
         LOGGER.info("Found {} students", students.size());
 
         return students;
     }
 
-    private List<StudentDTO> transformQueryResultIntoList(ResultSet rs) {
-        try {
+    private List<StudentDTO> transformQueryIntoList(ResultQuery query) {
+        try (ResultSet rs = query.fetchResultSet()){
             return jdbcMapper.stream(rs).collect(Collectors.toList());
         } catch (SQLException ex) {
             LOGGER.error("Cannot transform query result into a list because an error occurred", ex);
@@ -87,24 +87,23 @@ class StudentRepository {
     public Optional<StudentDTO> findById(Long id) {
         LOGGER.info("Finding student by id: {}", id);
 
-        ResultSet rs = jooq.select(STUDENTS.ID,
+        ResultQuery query = jooq.select(STUDENTS.ID,
                 STUDENTS.NAME,
                 BOOKS.ID.as("books_id"),
                 BOOKS.NAME.as("books_name")
         )
                 .from(STUDENTS)
                 .leftJoin(BOOKS).on(BOOKS.STUDENT_ID.eq(STUDENTS.ID))
-                .where(STUDENTS.ID.eq(id))
-                .fetchResultSet();
+                .where(STUDENTS.ID.eq(id));
 
-        Optional<StudentDTO> student = transformQueryResultIntoObject(rs);
+        Optional<StudentDTO> student = transformQueryIntoObject(query);
         LOGGER.info("Found student: {}", student);
 
         return student;
     }
 
-    private Optional<StudentDTO> transformQueryResultIntoObject(ResultSet rs) {
-        try {
+    private Optional<StudentDTO> transformQueryIntoObject(ResultQuery query) {
+        try (ResultSet rs = query.fetchResultSet()) {
             Iterator<StudentDTO> students = jdbcMapper.iterator(rs);
             if (!students.hasNext()) {
                 return Optional.empty();
