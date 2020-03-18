@@ -26,7 +26,7 @@
         <jooq.generator.db.dialect>org.jooq.util.h2.H2Database</jooq.generator.db.dialect>
         <slf4j.version>1.7.5</slf4j.version>
         <spring.version>4.1.2.RELEASE</spring.version>
-        <spring.data.commons.version>1.7.1.RELEASE</spring.data.commons.version>
+        <spring.data.commons.version>1.13.13.RELEASE</spring.data.commons.version>
         <build.profile.id>dev</build.profile.id>
         <skip.db.creation>false</skip.db.creation>
         <skip.integration.tests>true</skip.integration.tests>
