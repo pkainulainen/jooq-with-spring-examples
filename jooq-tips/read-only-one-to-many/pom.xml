@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.1.5</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>net.petrikainulainen.jooqtips</groupId>
+	<artifactId>read-only-one-to-many</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Implementing a Read-Only One-to-Many Relationship</name>
+	<description>
+		This sample project demonstrates how we can implement a read-only
+		one-to-many relationship with jOOQ.
+	</description>
+	<properties>
+		<database.username>jooq</database.username>
+		<database.password>jooq</database.password>
+
+		<jdk.version>17</jdk.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jooq</artifactId>
+		</dependency>
+		<!-- Testing dependencies -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+				<version>2.1.1</version>
+				<executions>
+					<execution>
+						<id>testcontainer-start</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>
+								db = new org.testcontainers.containers.PostgreSQLContainer("postgres:15.3")
+										.withUsername("${database.username}")
+										.withDatabaseName("jooq-tips")
+										.withPassword("${database.password}");
+
+								db.start();
+								project.properties.setProperty('database.url', db.getJdbcUrl());
+								project.properties.setProperty('testcontainer.containerid', db.getContainerId());
+								project.properties.setProperty('testcontainer.imageName', db.getDockerImageName());
+							</source>
+						</configuration>
+					</execution>
+					<execution>
+						<id>testcontainer-stop</id>
+						<phase>test</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>
+								containerId = "${testcontainer.containerid}"
+								imageName = "${testcontainer.imageName}"
+								println("Stopping testcontainer $containerId - $imageName")
+								org.testcontainers.utility.ResourceReaper
+										.instance()
+										.stopAndRemoveContainer(containerId, imageName);
+							</source>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.testcontainers</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>${testcontainers.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>9.20.0</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>migrate</goal>
+						</goals>
+						<configuration>
+							<url>${database.url}</url>
+							<user>${database.username}</user>
+							<password>${database.password}</password>
+							<locations>
+								<location>
+									filesystem:src/main/resources/db/migration
+								</location>
+							</locations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq-codegen-maven</artifactId>
+				<version>3.18.5</version>
+				<executions>
+					<execution>
+						<id>jooq-codegen</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<jdbc>
+						<url>${database.url}</url>
+						<user>${database.username}</user>
+						<password>${database.password}</password>
+					</jdbc>
+					<generator>
+						<database>
+							<name>org.jooq.meta.postgres.PostgresDatabase</name>
+							<includes>books|students</includes>
+							<inputSchema>public</inputSchema>
+						</database>
+						<generate>
+							<deprecated>false</deprecated>
+							<records>true</records>
+							<pojos>false</pojos>
+						</generate>
+						<target>
+							<packageName>net.petrikainulainen.jooqtips</packageName>
+						</target>
+					</generator>
+				</configuration>
+
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>${postgresql.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

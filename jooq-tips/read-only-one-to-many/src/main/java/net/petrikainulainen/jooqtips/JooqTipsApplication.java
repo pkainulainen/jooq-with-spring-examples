@@ -1,0 +1,12 @@
+package net.petrikainulainen.jooqtips;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class JooqTipsApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(JooqTipsApplication.class, args);
+    }
+}
