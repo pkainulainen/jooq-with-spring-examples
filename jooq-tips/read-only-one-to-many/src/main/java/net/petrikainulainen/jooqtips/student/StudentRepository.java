@@ -21,7 +21,8 @@ import static org.jooq.impl.DSL.selectDistinct;
  * Provides finder methods used to query the student information.
  */
 @Repository
-public class StudentRepository {
+@Transactional(readOnly = true)
+class StudentRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StudentRepository.class);
 
@@ -36,7 +37,6 @@ public class StudentRepository {
      * Returns a list that contains all students found from the database.
      * If no students is found, this method returns an empty list.
      */
-    @Transactional(readOnly = true)
     public List<StudentDTO> findAll() {
         LOGGER.debug("Finding all students");
         var students = buildSelectStep()
@@ -54,7 +54,6 @@ public class StudentRepository {
      *              If no student is found, this method returns an empty
      *              {@code Optional} object.
      */
-    @Transactional(readOnly = true)
     public Optional<StudentDTO> findById(Long id) {
         LOGGER.debug("Finding student by id: {}", id);
         var queryResult = buildSelectStep()
